@@ -47,7 +47,7 @@ namespace core {
 
 /*** START OF USER CONFIGURABLE SECTION - set architecture ***/
 
-#define CHUNK @WL@      /**< size of chunk in bits = wordlength of computer = 16, 32 or 64. Note not all curve options are supported on 16-bit processors */
+#define CHUNK 64      /**< size of chunk in bits = wordlength of computer = 16, 32 or 64. Note not all curve options are supported on 16-bit processors */
 
 /*** END OF USER CONFIGURABLE SECTION ***/
 
