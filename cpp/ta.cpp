@@ -1,19 +1,27 @@
 #include <bits/stdc++.h>
 using namespace std;
+#include "Lib/arch.h"
+#include "Lib/ecp_Ed25519.h"
+#include "ta.h"
+using namespace B256_56;
 
-class ta
-{
-private:
-    /* data */
-public:
-    ta(/* args */);
-    ~ta();
-};
-
-ta::ta(/* args */)
-{
+ta::long long privateKeyGeneration(){
+    /**TODO: **/
+    return 0;
 }
 
-ta::~ta()
-{
+ta::long long publicKeyGeneration(){
+    /**TODO: **/
+    return 0;
+}
+
+ta::long long validSignature(int rId, long long publicKey, Hash){
+    /*Check the message is Valid or not*/
+
+    bool check = true; // dummy value
+    if (check){
+        Dictionary.insert(rId, publicKey);
+    }
+
+    /*signs it*/
 }
