@@ -3,6 +3,7 @@
 #include "Lib/ecp_Ed25519.h"
 #include "vehicle.h"
 #include "key.h"
+#include "Lib/eddsa_Ed25519.h"
 using namespace std;
 using namespace B256_56;
 
@@ -52,4 +53,9 @@ void vehicle::requestVerification(const BIG rId, long long publicKey){
     /**TODO: **/
     Point x;
     vehicle::setSignature(x);
+}
+
+bool signMessage(bool ph,octet *secretKey, octet *context, octet *message, octet *signature){
+    using namespace Ed25519;
+    return EDDSA_SIGNATURE(ph,secretKey,context,message,signature);
 }
