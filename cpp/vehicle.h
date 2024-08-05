@@ -2,17 +2,16 @@
 #include "Lib/ecp_Ed25519.h"
 using namespace B256_56;
 
-class vehicle
-{
+class vehicle{
     private:
         int rId;
         Point vehiclePublicKey;
         long long vehiclePrivateKey;
-        long long signature;
+        Point signature;
 
     public:
         vehicle(int rId, Point generator);
-        ~vehicle(){};
+        ~vehicle();
 
         int getRId() const;
         void setRId(int rId);
@@ -20,10 +19,8 @@ class vehicle
         void setVehiclePublicKey(Point publicKey);
         long long getVehiclePrivateKey() const;
         void setVehiclePrivateKey(long long privateKey);
-        long long getSignature() const;
-        void setSignature(long long signature);
+        Point getSignature() const;
+        void setSignature(Point signature);
 
-        long long privateKeyGeneration(Point generator);
-        long long publicKeyGeneration();
         void requestVerification(const BIG rId, long long publicKey);
 };
