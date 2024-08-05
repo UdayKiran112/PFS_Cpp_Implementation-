@@ -4,5 +4,6 @@ class Point{
         long long y;
     
     public:
+    void Point_Generation(ECP G);
 
 };

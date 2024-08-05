@@ -5,21 +5,16 @@
 #include "Lib/randapi.h"
 #include "Lib/big_B256_56.h"
 #include "key.h"
+#include"point.h"
 using namespace B256_56;
+using namespace Ed25519;
 using namespace std;
 
 
 
-int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey)
+int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey,ECP *generatorPoint)
 {
-    using namespace Ed25519;
-    ECP generator;
-    ECP_generator(&generator);
-    if (ECP_generator(&generator) == 0)
-    {
-        cout << "Point at infinity" << endl;
-        return -1;
-    }
+    Point::Point_Generation(*generatorPoint);
     BIG order;
 
     // Manually copy the contents of CURVE_Order into the local order variable
@@ -47,39 +42,9 @@ int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey)
     return 0;
 }
 
-int main()
+int Pub_Key_Gen(octet *secretKey, octet *publicKey)
 {
-    csprng RNG;
-    int i;
-    char pr[10];
-    unsigned long ran;
-    char raw[100];
-
-    // Seed RNG with some randomness
-    time((time_t *)&ran);
-    for (i = 0; i < 100; i++)
-    {
-        raw[i] = i ^ ran;
-    }
-
-    RAND_seed(&RNG, 100, raw);
-
-     char sk_val[MODBYTES_B256_56];
-    octet SK = {0, sizeof(sk_val), sk_val};
-
-    char sk2_val[MODBYTES_B256_56];
-    octet SK2 = {0, sizeof(sk2_val), sk2_val};
-
-    if (Priv_Key_Gen(&RNG, &SK) != 0)
-    {
-        cout << "Error" << endl;
-        return -1;
-    }
-    if (Priv_Key_Gen(&RNG, &SK2) != 0)
-    {
-        cout << "Error" << endl;
-        return -1;
-    }
-
-    return 0;
+    // TODO
+    BIG order;
 }
+
