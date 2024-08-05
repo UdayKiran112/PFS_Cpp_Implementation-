@@ -5,18 +5,14 @@
 #include "Lib/randapi.h"
 #include "Lib/big_B256_56.h"
 #include "key.h"
-#include"point.h"
+#include "point.h"
 using namespace B256_56;
 using namespace Ed25519;
 using namespace std;
 
-
-
-int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey,ECP *generatorPoint)
+int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey)
 {
-    Point::Point_Generation(*generatorPoint);
     BIG order;
-
     // Manually copy the contents of CURVE_Order into the local order variable
     for (int i = 0; i < NLEN_B256_56; i++)
     {
@@ -34,6 +30,8 @@ int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey,ECP *generatorP
         BIG_fromBytes(secret, secretKey->val);
     }
 
+    secretKey->len = NLEN_B256_56;
+    BIG_toBytes(secretKey->val, secret);
     // Ensure that secret is within range [1,order-1]
     if (BIG_comp(secret, order) >= 0)
     {
@@ -42,9 +40,19 @@ int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey,ECP *generatorP
     return 0;
 }
 
-int Pub_Key_Gen(octet *secretKey, octet *publicKey)
+int Pub_Key_Gen(octet *secretKey, octet *publicKey, ECP *generatorPoint)
 {
-    // TODO
-    BIG order;
-}
+    int res = 0;
+    BIG secret, order;
 
+    // Manually copy the contents of CURVE_Order into the local order variable
+    for (int i = 0; i < NLEN_B256_56; i++)
+    {
+        order[i] = CURVE_Order[i];
+    }
+
+    BIG_fromBytes(secret, secretKey->val);
+    ECP_clmul(generatorPoint, secret, order);
+    ECP_toOctet(publicKey, generatorPoint, false);
+    return res;
+}
