@@ -14,7 +14,7 @@ void Point::Point_Generation(ECP G)
     
     ECP P;
     ECP_generator(&P);
-    if (ECP_isinf(&P) == 0)
+    if (ECP_isinf(&P) == 1)
     {
         cout << "Point at infinity" << endl;
         exit(0);

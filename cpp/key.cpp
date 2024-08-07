@@ -54,7 +54,7 @@ int Pub_Key_Gen(octet *secretKey, octet *publicKey, ECP *generatorPoint)
     }
 
     BIG_fromBytes(secret, secretKey->val);
-    ECP_clmul(generatorPoint, secret, order);
+    ECP_mul(generatorPoint, secret);
     ECP_toOctet(publicKey, generatorPoint, false);
 
     // Validating Public Key
