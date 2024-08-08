@@ -1,29 +1,19 @@
 #include <bits/stdc++.h>
+#include "TA.h"
 using namespace std;
-#include "Lib/arch.h"
-#include "Lib/ecp_Ed25519.h"
-#include "Lib/big_B256_56.h"
-#include "ta.h"
-#include "key.h"
-using namespace B256_56;
 
-ta::long long privateKeyGeneration(){
-    /**TODO: **/
-    return 0;
+TA::TA(){
+    
 }
 
-ta::long long publicKeyGeneration(){
-    /**TODO: **/
-    return 0;
+void TA::validateRequest(int registrationId, int vehiclePublicKey, int SignatureKey /*need to set*/, int A /*need to set*/){
+    //TODO
 }
 
-ta::long long validSignature(int rId, long long publicKey, Hash){
-    /*Check the message is Valid or not*/
+void TA::setGroupKey(Key groupKey){
+    this->groupKey = groupKey;
+}
 
-    bool check = true; // dummy value
-    if (check){
-        Dictionary.insert(rId, publicKey);
-    }
-
-    /*signs it*/
+Key TA::getGroupKey(){
+    return groupKey;
 }

@@ -1,16 +1,13 @@
-
-class ta{
-
+#include<bits/stdc++.h>
+#include "Key.h"
+using namespace std;
+class TA{
     private:
-    map<int, long long> Dictionary;
-
-    long long groupPrivateKey;
-    long long groupPublicKey;
-
+        Key groupKey;
+        unordered_map<int, int> dictionary;
+    
     public:
-        ta();
-        ~ta();
-        long long privateKeyGeneration();
-        long long publicKeyGeneration();
-        long long validSignature(const BIG rId, long long publicKey, Hash);
+        void validateRequest(int registrationId, int vehiclePublicKey, int SignatureKey /*need to set*/, int A /*need to set*/);
+        void setGroupKey(Key groupKey);
+        Key getGroupKey();
 };

@@ -1,26 +1,39 @@
-#include "Lib/arch.h"
-#include "Lib/ecp_Ed25519.h"
-using namespace B256_56;
+#include <bits/stdc++.h>
+#include "Key.h"
+#include "TA.h"
+#include "Message.h"
+using namespace std;
 
-class vehicle{
+class Vehicle{
     private:
-        int rId;
-        Point vehiclePublicKey;
-        long long vehiclePrivateKey;
-        Point signature;
-
+        int registrationId;
+        Key vehicleKey;
+        int signatureKey; // will change
+        int A; //Public Key data Type
+        TA ta;
+        
     public:
-        vehicle(int rId, Point generator);
-        ~vehicle();
+        Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA ta);
+        int getRegistrationId();
+        Key getVehicleKey();
+        int getSignatureKey();
+        int getA();
+        TA getTA();
+        
+        void setRegistrationId(int registrationId);
+        void setVehicleKey(Key vehicleKey);
+        void setSignatureKey(int signatureKey);
+        void setA(int A);
+        void setTA(TA ta);
+        
+        int generateSignatureKey(int randomGenerator);
+        int generateA(int randomGenerator);
+        int generateRegistrationId(int randomGenerator);
+        Key generateVehicleKey(int randomGenerator);
 
-        int getRId() const;
-        void setRId(int rId);
-        Point getVehiclePublicKey() const;
-        void setVehiclePublicKey(Point publicKey);
-        long long getVehiclePrivateKey() const;
-        void setVehiclePrivateKey(long long privateKey);
-        Point getSignature() const;
-        void setSignature(Point signature);
+        void requestVerification();
+        
+        void sendingMessage(int vehiclePrivateKey /*prolly BIG*/, int signatureKey /*prolly BIG*/, Message message);
 
-        void requestVerification(const BIG rId, long long publicKey);
+        void validateMessage(Message message, int signatureKey /*prolly BIG*/, int A /*public key datatype*/, int senderPublicKey);
 };
