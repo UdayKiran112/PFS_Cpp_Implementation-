@@ -88,5 +88,6 @@ bool Validate_Message(octet* message, octet* message_signature, octet* vehicle_p
     if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay){
         return false;
     }
-    return verifyMessage(false,vehicle_public_key,NULL,message,message_signature);
+    // Function has to be edited still
+    return true;
 }
