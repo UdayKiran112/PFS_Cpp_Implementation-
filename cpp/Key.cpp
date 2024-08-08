@@ -1,6 +1,8 @@
 #include <bits/stdc++.h>
 #include "Key.h"
 using namespace std;
+using namespace Ed25519;
+using namespace B256_56;
 
 Key::Key(){
 
