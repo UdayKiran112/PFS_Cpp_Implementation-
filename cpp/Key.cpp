@@ -1,9 +1,6 @@
 #include <bits/stdc++.h>
 #include "Key.h"
 using namespace std;
-using namespace Ed25519;
-using namespace B256_56;
-
 Key::Key(){
 
 }
@@ -61,6 +58,8 @@ void Key::PointGeneration(Ed25519::ECP G)
  */
 int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey)
 {
+    using namespace Ed25519;
+    using namespace B256_56;
     BIG order;
     // Manually copy the contents of CURVE_Order into the local order variable
     for (int i = 0; i < NLEN_B256_56; i++)
@@ -103,6 +102,8 @@ int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey)
  */
 int Key::generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *generatorPoint)
 {
+    using namespace Ed25519;
+    using namespace B256_56;
     int res = 0;
     BIG secret, order;
 
