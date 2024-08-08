@@ -2,6 +2,10 @@
 #include "Key.h"
 #include "TA.h"
 #include "Message.h"
+
+#include "Lib/core.h"
+#include "Lib/eddsa_Ed25519.h"
+
 using namespace std;
 
 class Vehicle{
