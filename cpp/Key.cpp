@@ -23,11 +23,30 @@ void Key::setPublicKey(int publicKey){
 
 }
 
-int Key::generatePublicKey(int randomGenerator){
-
-}
-int Key::generatePrivateKey(int privateKey){
-
+/**
+ * Generates a point on the Ed25519 curve and assigns it to the given ECP object.
+ *
+ * @param G the ECP object to store the generated point
+ *
+ * @throws None
+ */
+void Key::PointGeneration(Ed25519::ECP G)
+{
+    using namespace Ed25519;
+    
+    ECP P;
+    ECP_generator(&P);
+    if (ECP_isinf(&P) == 1)
+    {
+        cout << "Point at infinity" << endl;
+        exit(0);
+    }
+    else
+    {
+        ECP_copy(&G, &P);
+        cout << "Point generated" << endl;
+        ECP_output(&G);
+    }
 }
 
 /**
@@ -40,7 +59,7 @@ int Key::generatePrivateKey(int privateKey){
  *
  * @throws None
  */
-int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey)
+int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey)
 {
     BIG order;
     // Manually copy the contents of CURVE_Order into the local order variable
@@ -82,7 +101,7 @@ int Priv_Key_Gen(csprng *randomNumberGenerator, octet *secretKey)
  *
  * @throws None.
  */
-int Pub_Key_Gen(octet *secretKey, octet *publicKey, ECP *generatorPoint)
+int Key::generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *generatorPoint)
 {
     int res = 0;
     BIG secret, order;
@@ -105,30 +124,4 @@ int Pub_Key_Gen(octet *secretKey, octet *publicKey, ECP *generatorPoint)
         return -1;
     }
     return res;
-}
-
-/**
- * Generates a point on the Ed25519 curve and assigns it to the given ECP object.
- *
- * @param G the ECP object to store the generated point
- *
- * @throws None
- */
-void Point_Generation(ECP G)
-{
-    using namespace Ed25519;
-    
-    ECP P;
-    ECP_generator(&P);
-    if (ECP_isinf(&P) == 1)
-    {
-        cout << "Point at infinity" << endl;
-        exit(0);
-    }
-    else
-    {
-        ECP_copy(&G, &P);
-        cout << "Point generated" << endl;
-        ECP_output(&G);
-    }
 }

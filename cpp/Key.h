@@ -17,6 +17,7 @@ class Key{
         void setPrivateKey(int privateKey);
         void setPublicKey(int publicKey);
 
-        int generatePublicKey(int randomGenerator);
-        int generatePrivateKey(int privateKey);
+        void PointGeneration(Ed25519::ECP G);
+        int generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *generatorPoint);
+        int generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey);
 };
