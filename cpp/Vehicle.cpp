@@ -133,6 +133,14 @@ void Vehicle::sendingMessage(int vehiclePrivateKey, int signatureKey, Message me
 void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, int A /*public key datatype*/, int senderPublicKey)
 {
     // TODO
+
+    auto timestamp = message.getTimestamp();
+    if (!Validate_Message(timestamp))
+    {
+        cout << "Message has Expired\n";
+        return;
+    }
+
     octet Q,M, SIG;
 
     string s = message.getMessage();
@@ -166,7 +174,7 @@ void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, 
  *
  * @throws None
  */
-bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
+static bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
 {
     using namespace Ed25519;
     return EDDSA_SIGNATURE(ph, privateKey, context, message, signature);
@@ -185,7 +193,7 @@ bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, oct
  *
  * @throws None
  */
-bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature)
+static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature)
 {
 
     return EDDSA_VERIFY(ph, publicKey, context, message, signature);
@@ -193,7 +201,7 @@ bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, oc
 
 #define T_replay 1000 // Define T_replay with an appropriate value
 
-bool Validate_Message(octet *message, octet *message_signature, octet *vehicle_public_key, octet *General_Key, ECP *A, ECP *B, ECP *G, chrono::system_clock::time_point timeStamp)
+static bool Validate_Message(chrono::system_clock::time_point timeStamp)
 {
     auto now = std::chrono::system_clock::now();
     if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay)

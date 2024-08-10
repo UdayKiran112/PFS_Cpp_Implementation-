@@ -6,7 +6,7 @@ Message::Message(){
     
 }
 
-Message::Message(string message, int Timestamp, int B, int hashMsg){
+Message::Message(string message, chrono::system_clock::time_point Timestamp, int B, int hashMsg){
     this->message = message;
     this->Timestamp = Timestamp;
     this->B = B;
@@ -17,7 +17,7 @@ string Message::getMessage(){
     return message;
 }
 
-int Message::getTimestamp(){
+chrono::system_clock::time_point Message::getTimestamp(){
     return Timestamp;
 }
 
@@ -33,7 +33,7 @@ void Message::setMessage(string message){
     this->message = message;
 }
 
-void Message::setTimestamp(int Timestamp){
+void Message::setTimestamp(chrono::system_clock::time_point Timestamp){
     this->Timestamp = Timestamp;
 }
 
