@@ -125,3 +125,25 @@ void Hash_Function(octet *input, octet *output, int pad)
 
     cout << "Hashed" << endl;
 }
+
+/* Concatenate two octet strings */
+void Concatenate_octet(octet *data1, octet *data2, octet *result)
+{
+    int total_length = data1->len + data2->len;
+    result->len = total_length;
+    memcpy(result->val, data1->val, data1->len);
+    memcpy(result->val + data1->len, data2->val, data2->len);
+}
+
+void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result)
+{
+    using namespace B256_56;
+    octet p1, p2;
+    p1.len = NLEN_B256_56;
+    p2.len = NLEN_B256_56;
+
+    BIG_toBytes(p1.val, point1);
+    BIG_toBytes(p2.val, point2);
+    Concatenate_octet(&p1, &p2, result);
+    cout << "Concatenated" << endl;
+}
