@@ -69,7 +69,7 @@ static void reverse(int n, char *buff)
 // dom2 - context still needs to be appended
 static void dom2(bool ph, int cl, octet *DOM)
 {
-    OCT_jstring(DOM, (char *)"SigZZZ no ZZZ collisions");
+    OCT_jstring(DOM, (char *)"SigEd25519 no Ed25519 collisions");
     if (ph)
         OCT_jbyte(DOM, 1, 1);
     else
@@ -80,7 +80,7 @@ static void dom2(bool ph, int cl, octet *DOM)
 // dom4 - context still needs to be appended
 static void dom4(bool ph, int cl, octet *DOM)
 {
-    OCT_jstring(DOM, (char *)"SigZZZ");
+    OCT_jstring(DOM, (char *)"SigEd25519");
     if (ph)
         OCT_jbyte(DOM, 1, 1);
     else
@@ -90,7 +90,7 @@ static void dom4(bool ph, int cl, octet *DOM)
 
 static void H(octet *S, char *digest)
 {
-#if CURVE_SECURITY_ZZZ <= 128 // for ed25519?
+#if CURVE_SECURITY_Ed25519 <= 128 // for ed25519?
     hash512 sh512;
     HASH512_init(&sh512);
     for (int i = 0; i < S->len; i++)
@@ -116,7 +116,7 @@ static int H2(bool ph, octet *context, octet *R, octet *Q, octet *M, DBIG dr)
         cl = 0;
     else
         cl = context->len & 0xff;
-#if CURVE_SECURITY_ZZZ <= 128 // for ed25519?
+#if CURVE_SECURITY_Ed25519 <= 128 // for ed25519?
     hash512 sh512;
     HASH512_init(&sh512);
     if (ph || cl > 0)
@@ -166,7 +166,7 @@ static void getR(bool ph, int b, char *digest, octet *context, octet *M, DBIG dr
     else
         cl = context->len & 0xff;
 
-#if CURVE_SECURITY_ZZZ <= 128 // for ed25519?
+#if CURVE_SECURITY_Ed25519 <= 128 // for ed25519?
     hash512 sh512;
     HASH512_init(&sh512);
     if (ph || cl > 0)
@@ -274,7 +274,7 @@ static void decode(octet *W, Ed25519::ECP *P)
     FP_rcopy(&t, Ed25519::CURVE_B);
 
     FP_mul(&d, &d, &t);
-#if CURVE_A_ZZZ == 1
+#if CURVE_A_Ed25519 == 1
     FP_sub(&d, &d, &one);
 #else
     FP_add(&d, &d, &one);

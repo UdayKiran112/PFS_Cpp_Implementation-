@@ -83,26 +83,81 @@ Key Vehicle::generateVehicleKey(int randomGenerator)
 }
 
 using namespace core;
+using namespace Ed25519;
 void Vehicle::requestVerification()
 {
     // TODO
 }
 
-void Vehicle::sendingMessage(int vehiclePrivateKey /*prolly BIG*/, int signatureKey /*prolly BIG*/, Message message)
+static char *StrtoCharstar(string s)
 {
-    // TODO
+    char *c = new char[s.length() + 1];
+    strcpy(c, s.c_str());
+    return c;
 }
+
+void Vehicle::sendingMessage(int vehiclePrivateKey, int signatureKey, Message message) {
+    char q[EFS_Ed25519], sig[2 * EFS_Ed25519];
+    string s = message.getMessage();
+
+    // Convert the string message to a char array
+    char *msg = StrtoCharstar(s); // Ensure this allocates memory correctly
+    if (!msg) {
+        cout << "Failed to convert message to char*";
+        return;
+    }
+
+    // Initialize octet structures
+    octet D = {sizeof(int), sizeof(int), reinterpret_cast<char*>(&vehiclePrivateKey)};
+    octet Q = {sizeof(q), sizeof(q), q};
+    octet M = {static_cast<int>(s.length()), static_cast<int>(s.length()), msg};
+    octet SIG = {sizeof(sig), sizeof(sig), sig};
+
+    // Sign the message
+    bool x = signMessage(false, &D, NULL, &M, &SIG);
+    if(!x) {
+        cout << "No Signature Generated";
+        delete[] msg; // Clean up memory if necessary
+        return;
+    }
+
+    // Output the signature
+    cout << "Signature= 0x";
+    OCT_output(&SIG);
+
+    // Clean up memory if necessary
+    delete[] msg;
+}
+
 
 void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, int A /*public key datatype*/, int senderPublicKey)
 {
     // TODO
+    octet Q,M, SIG;
+
+    string s = message.getMessage();
+    char *msg = StrtoCharstar(s);
+    if (!msg) {
+        cout << "Failed to convert message to char*";
+        return;
+    }
+    Q = {};
+    M = {static_cast<int>(s.length()), static_cast<int>(s.length()), msg};
+    SIG = {sizeof(signatureKey), sizeof(signatureKey), reinterpret_cast<char*>(&signatureKey)};
+
+    bool verify = verifyMessage(false, &Q, NULL, &M, &SIG);
+
+    if(!verify) {
+        cout << "Message has been Comprimised\n";
+        delete[] msg;
+    }
 }
 
 /**
  * Signs a message using the Ed25519 algorithm.
  *
  * @param ph a boolean indicating whether to include the prehash flag
- * @param secretKey the secret key for signing the message
+ * @param privateKey the secret key for signing the message
  * @param context additional context for the message
  * @param message the message to be signed
  * @param signature the resulting signature
@@ -111,13 +166,11 @@ void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, 
  *
  * @throws None
  */
-bool signMessage(bool ph, octet *secretKey, octet *context, octet *message, octet *signature)
+bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
 {
     using namespace Ed25519;
-    return EDDSA_SIGNATURE(ph, secretKey, context, message, signature);
+    return EDDSA_SIGNATURE(ph, privateKey, context, message, signature);
 }
-
-using namespace Ed25519;
 
 /**
  * Verifies a message using the Ed25519 algorithm.
@@ -134,7 +187,7 @@ using namespace Ed25519;
  */
 bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature)
 {
-    
+
     return EDDSA_VERIFY(ph, publicKey, context, message, signature);
 }
 
