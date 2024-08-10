@@ -4,10 +4,13 @@ using namespace std;
 class TA{
     private:
         Key groupKey;
-        unordered_map<int, int> dictionary;
+        vector<pair<octet, octet>> dictionary;
     
     public:
-        void validateRequest(int registrationId, int vehiclePublicKey, int SignatureKey /*need to set*/, int A /*need to set*/);
+        TA();
+        void validateRequest(octet registrationId, octet vehiclePublicKey, octet SignatureKey, octet A);
         void setGroupKey(Key groupKey);
         Key getGroupKey();
+        vector<pair<octet, octet>> getDictionary();
+        void setDictionary(vector<pair<octet, octet>> dictionary);
 };

@@ -4,29 +4,22 @@ using namespace std;
 Key::Key()
 {
 }
-Key::Key(int privateKey)
-{
+Key::Key(octet privateKey){
+    this->privateKey = privateKey;
 }
-int Key::getPrivateKey()
-{
+octet Key::getPrivateKey(){
+    return privateKey;
 }
-int Key::getPublicKey()
-{
+octet Key::getPublicKey(){
+    return publicKey;
 }
-void Key::setPrivateKey(int privateKey)
-{
+void Key::setPrivateKey(octet privateKey){
+    this->privateKey = privateKey;
 }
-void Key::setPublicKey(int publicKey)
-{
+void Key::setPublicKey(octet publicKey){
+    this->publicKey = publicKey;
 }
 
-/**
- * Generates a point on the Ed25519 curve and assigns it to the given ECP object.
- *
- * @param G the ECP object to store the generated point
- *
- * @throws None
- */
 void Key::PointGeneration(Ed25519::ECP G)
 {
     using namespace Ed25519;
@@ -46,17 +39,7 @@ void Key::PointGeneration(Ed25519::ECP G)
     }
 }
 
-/**
- * Generates a private key using a random number generator.
- *
- * @param randomNumberGenerator Pointer to a csprng object for generating random numbers. If nullptr, uses the bytes in secretKey to generate the secret.
- * @param secretKey Pointer to an octet object to store the generated secret key.
- *
- * @return 0 if the secret key is in range of the group order, -1 otherwise.
- *
- * @throws None
- */
-int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey)
+int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *PrivateKey)
 {
     using namespace Ed25519;
     using namespace B256_56;
@@ -75,32 +58,21 @@ int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey)
     }
     else
     {
-        BIG_fromBytes(secret, secretKey->val);
+        BIG_fromBytes(secret, PrivateKey->val);
     }
 
-    secretKey->len = NLEN_B256_56;
-    BIG_toBytes(secretKey->val, secret);
+    PrivateKey->len = NLEN_B256_56;
+    BIG_toBytes(PrivateKey->val, secret);
 
-    // Ensure that secretKey is in range of group order
-    if (ECP_IN_RANGE(secretKey) == 0)
+    // Ensure that PrivateKey is in range of group order
+    if (ECP_IN_RANGE(PrivateKey) == 0)
     {
         return -1;
     }
     return 0;
 }
 
-/**
- * Generates a public key from a secret key and a generator point on an elliptic curve.
- *
- * @param secretKey Pointer to an octet object containing the secret key.
- * @param publicKey Pointer to an octet object to store the generated public key.
- * @param generatorPoint Pointer to an ECP object representing the generator point on the elliptic curve.
- *
- * @return 0 if the public key is successfully generated and validated, -1 otherwise.
- *
- * @throws None.
- */
-int Key::generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *generatorPoint)
+int Key::generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *generatorPoint)
 {
     using namespace Ed25519;
     using namespace B256_56;
@@ -113,7 +85,7 @@ int Key::generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *gen
         order[i] = CURVE_Order[i];
     }
 
-    BIG_fromBytes(secret, secretKey->val);
+    BIG_fromBytes(secret, PrivateKey->val);
     ECP_mul(generatorPoint, secret);
     ECP_toOctet(publicKey, generatorPoint, false);
 
