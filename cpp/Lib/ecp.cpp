@@ -22,44 +22,44 @@
 
 //#define HAS_MAIN
 
-#include "ecp_ZZZ.h"
+#include "ecp_Ed25519.h"
 
-using namespace XXX;
-using namespace YYY;
+using namespace B256_56;
+using namespace F25519;
 
 /* test for P=O point-at-infinity */
-int ZZZ::ECP_isinf(ECP *P)
+int Ed25519::ECP_isinf(ECP *P)
 {
 
-#if CURVETYPE_ZZZ==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
     return (FP_iszilch(&(P->x)) && FP_equals(&(P->y), &(P->z)));
 #endif
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     return (FP_iszilch(&(P->x)) && FP_iszilch(&(P->z)));
 #endif
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     return FP_iszilch(&(P->z));
 #endif
 
 }
 
 /* Conditional swap of P and Q dependant on d */
-static void ECP_cswap(ZZZ::ECP *P, ZZZ::ECP *Q, int d)
+static void ECP_cswap(Ed25519::ECP *P, Ed25519::ECP *Q, int d)
 {
     FP_cswap(&(P->x), &(Q->x), d);
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_cswap(&(P->y), &(Q->y), d);
 #endif
     FP_cswap(&(P->z), &(Q->z), d);
 
 }
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 /* Conditional move Q to P dependant on d */
-static void ECP_cmove(ZZZ::ECP *P, ZZZ::ECP *Q, int d)
+static void ECP_cmove(Ed25519::ECP *P, Ed25519::ECP *Q, int d)
 {
     FP_cmove(&(P->x), &(Q->x), d);
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_cmove(&(P->y), &(Q->y), d);
 #endif
     FP_cmove(&(P->z), &(Q->z), d);
@@ -73,13 +73,13 @@ static int teq(sign32 b, sign32 c)
     x -= 1; // if x=0, x now -1
     return (int)((x >> 31) & 1);
 }
-#endif // CURVETYPE_ZZZ!=MONTGOMERY
+#endif // CURVETYPE_Ed25519!=MONTGOMERY
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 /* Constant time select from pre-computed table */
-static void ECP_select(ZZZ::ECP *P, ZZZ::ECP W[], sign32 b)
+static void ECP_select(Ed25519::ECP *P, Ed25519::ECP W[], sign32 b)
 {
-    ZZZ::ECP MP;
+    Ed25519::ECP MP;
     sign32 m = b >> 31;
     sign32 babs = (b ^ m) - m;
 
@@ -102,14 +102,14 @@ static void ECP_select(ZZZ::ECP *P, ZZZ::ECP W[], sign32 b)
 
 /* Test P == Q */
 /* SU=168 */
-int ZZZ::ECP_equals(ECP *P, ECP *Q)
+int Ed25519::ECP_equals(ECP *P, ECP *Q)
 {
     FP a, b;
     FP_mul(&a, &(P->x), &(Q->z));
     FP_mul(&b, &(Q->x), &(P->z));
     if (!FP_equals(&a, &b)) return 0;
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_mul(&a, &(P->y), &(Q->z));
     FP_mul(&b, &(Q->y), &(P->z));
     if (!FP_equals(&a, &b)) return 0;
@@ -120,21 +120,21 @@ int ZZZ::ECP_equals(ECP *P, ECP *Q)
 
 /* Set P=Q */
 /* SU=16 */
-void ZZZ::ECP_copy(ECP *P, ECP *Q)
+void Ed25519::ECP_copy(ECP *P, ECP *Q)
 {
     FP_copy(&(P->x), &(Q->x));
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_copy(&(P->y), &(Q->y));
 #endif
     FP_copy(&(P->z), &(Q->z));
 }
 
 /* Set P=-Q */
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 /* SU=8 */
-void ZZZ::ECP_neg(ECP *P)
+void Ed25519::ECP_neg(ECP *P)
 {
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     FP_neg(&(P->y), &(P->y));
     FP_norm(&(P->y));
 #else
@@ -146,13 +146,13 @@ void ZZZ::ECP_neg(ECP *P)
 #endif
 
 /* Set P=O */
-void ZZZ::ECP_inf(ECP *P)
+void Ed25519::ECP_inf(ECP *P)
 {
     FP_zero(&(P->x));
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_one(&(P->y));
 #endif
-#if CURVETYPE_ZZZ!=EDWARDS
+#if CURVETYPE_Ed25519!=EDWARDS
     FP_zero(&(P->z));
 #else
     FP_one(&(P->z));
@@ -161,19 +161,19 @@ void ZZZ::ECP_inf(ECP *P)
 
 /* Calculate right Hand Side of curve equation y^2=RHS */
 /* SU=56 */
-void ZZZ::ECP_rhs(FP *v, FP *x)
+void Ed25519::ECP_rhs(FP *v, FP *x)
 {
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     /* x^3+Ax+B */
     FP t;
     FP_sqr(&t, x);
     FP_mul(&t, &t, x);
 
-#if CURVE_A_ZZZ == -3    
+#if CURVE_A_Ed25519 == -3    
 
     FP_neg(v, x);
     FP_norm(v);
-    FP_imul(v, v, -CURVE_A_ZZZ);
+    FP_imul(v, v, -CURVE_A_Ed25519);
     FP_norm(v);
     FP_add(v, &t, v);
 #else
@@ -185,7 +185,7 @@ void ZZZ::ECP_rhs(FP *v, FP *x)
     FP_reduce(v);
 #endif
 
-#if CURVETYPE_ZZZ==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
     /* (Ax^2-1)/(Bx^2-1) */
     FP t, one;
     FP_sqr(v, x);
@@ -195,10 +195,10 @@ void ZZZ::ECP_rhs(FP *v, FP *x)
     FP_mul(&t, v, &t);
     FP_sub(&t, &t, &one);
     FP_norm(&t);
-#if CURVE_A_ZZZ == 1
+#if CURVE_A_Ed25519 == 1
     FP_sub(v, v, &one);
 #endif
-#if CURVE_A_ZZZ == -1
+#if CURVE_A_Ed25519 == -1
     FP_add(v, v, &one);
     FP_norm(v);
     FP_neg(v, v);
@@ -209,13 +209,13 @@ void ZZZ::ECP_rhs(FP *v, FP *x)
     FP_reduce(v);
 #endif
 
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     /* x^3+Ax^2+x */
     FP x2, x3;
     FP_sqr(&x2, x);
     FP_mul(&x3, &x2, x);
     FP_copy(v, x);
-    FP_imul(&x2, &x2, CURVE_A_ZZZ);
+    FP_imul(&x2, &x2, CURVE_A_Ed25519);
     FP_add(v, v, &x2);
     FP_add(v, v, &x3);
     FP_reduce(v);
@@ -224,11 +224,11 @@ void ZZZ::ECP_rhs(FP *v, FP *x)
 
 /* Set P=(x,y) */
 
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
 
 /* Set P=(x,{y}) */
 
-int ZZZ::ECP_set(ECP *P, BIG x)
+int Ed25519::ECP_set(ECP *P, BIG x)
 {
     FP rhs;
     FP_nres(&rhs, x);
@@ -247,7 +247,7 @@ int ZZZ::ECP_set(ECP *P, BIG x)
 }
 
 /* Extract x coordinate as BIG */
-int ZZZ::ECP_get(BIG x, ECP *P)
+int Ed25519::ECP_get(BIG x, ECP *P)
 {
     ECP W;
     ECP_copy(&W, P);
@@ -261,7 +261,7 @@ int ZZZ::ECP_get(BIG x, ECP *P)
 #else
 /* Extract (x,y) and return sign of y. If x and y are the same return only x */
 /* SU=16 */
-int ZZZ::ECP_get(BIG x, BIG y, ECP *P)
+int Ed25519::ECP_get(BIG x, BIG y, ECP *P)
 {
     ECP W;
     ECP_copy(&W, P);
@@ -274,7 +274,7 @@ int ZZZ::ECP_get(BIG x, BIG y, ECP *P)
 
 /* Set P=(x,{y}) */
 /* SU=96 */
-int ZZZ::ECP_set(ECP *P, BIG x, BIG y)
+int Ed25519::ECP_set(ECP *P, BIG x, BIG y)
 {
     FP rhs, y2;
 
@@ -299,7 +299,7 @@ int ZZZ::ECP_set(ECP *P, BIG x, BIG y)
 
 /* Set P=(x,y), where y is calculated from x with sign s */
 /* SU=136 */
-int ZZZ::ECP_setx(ECP *P, BIG x, int s)
+int Ed25519::ECP_setx(ECP *P, BIG x, int s)
 {
     FP rhs,hint;
     FP_nres(&rhs, x);
@@ -326,7 +326,7 @@ int ZZZ::ECP_setx(ECP *P, BIG x, int s)
 
 /* Convert P to Affine, from (x,y,z) to (x,y) */
 /* SU=160 */
-void ZZZ::ECP_affine(ECP *P)
+void Ed25519::ECP_affine(ECP *P)
 {
     FP one, iz;
     if (ECP_isinf(P)) return;
@@ -336,7 +336,7 @@ void ZZZ::ECP_affine(ECP *P)
     FP_inv(&iz, &(P->z), NULL);
     FP_mul(&(P->x), &(P->x), &iz);
 
-#if CURVETYPE_ZZZ==EDWARDS || CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==EDWARDS || CURVETYPE_Ed25519==WEIERSTRASS
 
     FP_mul(&(P->y), &(P->y), &iz);
     FP_reduce(&(P->y));
@@ -348,7 +348,7 @@ void ZZZ::ECP_affine(ECP *P)
 }
 
 /* SU=120 */
-void ZZZ::ECP_outputxyz(ECP *P)
+void Ed25519::ECP_outputxyz(ECP *P)
 {
     BIG x, z;
     if (ECP_isinf(P))
@@ -361,7 +361,7 @@ void ZZZ::ECP_outputxyz(ECP *P)
     FP_reduce(&(P->z));
     FP_redc(z, &(P->z));
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     BIG y;
     FP_reduce(&(P->y));
     FP_redc(y, &(P->y));
@@ -384,7 +384,7 @@ void ZZZ::ECP_outputxyz(ECP *P)
 
 /* SU=16 */
 /* Output point P */
-void ZZZ::ECP_output(ECP *P)
+void Ed25519::ECP_output(ECP *P)
 {
     BIG x, y;
     if (ECP_isinf(P))
@@ -393,7 +393,7 @@ void ZZZ::ECP_output(ECP *P)
         return;
     }
     ECP_affine(P);
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_reduce(&(P->x));
     FP_reduce(&(P->y));
     FP_redc(x, &(P->x));
@@ -414,11 +414,11 @@ void ZZZ::ECP_output(ECP *P)
 
 /* SU=16 */
 /* Output point P */
-void ZZZ::ECP_rawoutput(ECP *P)
+void Ed25519::ECP_rawoutput(ECP *P)
 {
     BIG x, y, z;
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     FP_redc(x, &(P->x));
     FP_redc(y, &(P->y));
     FP_redc(z, &(P->z));
@@ -442,12 +442,12 @@ void ZZZ::ECP_rawoutput(ECP *P)
 
 /* SU=88 */
 /* Convert P to octet string, compressing if desired */
-void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
+void Ed25519::ECP_toOctet(octet *W, ECP *P, bool compress)
 {
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     BIG x;
     ECP_get(x, P);
-    W->len = MODBYTES_XXX; // + 1;
+    W->len = MODBYTES_B256_56; // + 1;
     BIG_toBytes(&(W->val[0]), x);
 #else
     BIG x, y;
@@ -456,7 +456,7 @@ void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
     ECP_get(x, y, P);
 
 #if (MBITS-1)%8 <= 4
-#ifdef ALLOW_ALT_COMPRESS_ZZZ
+#ifdef ALLOW_ALT_COMPRESS_Ed25519
     alt=true;
 #endif
 #endif
@@ -466,12 +466,12 @@ void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
         BIG_toBytes(&(W->val[0]), x);
         if (compress)
         {
-            W->len = MODBYTES_XXX;
+            W->len = MODBYTES_B256_56;
             W->val[0]|=0x80;
             if (FP_islarger(&(P->y))==1) W->val[0]|=0x20;
         } else {
-            W->len = 2 * MODBYTES_XXX;
-            BIG_toBytes(&(W->val[MODBYTES_XXX]), y);
+            W->len = 2 * MODBYTES_B256_56;
+            BIG_toBytes(&(W->val[MODBYTES_B256_56]), y);
         }
     } else {
         BIG_toBytes(&(W->val[1]), x);
@@ -479,11 +479,11 @@ void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
         {
             W->val[0] = 0x02;
             if (FP_sign(&(P->y)) == 1) W->val[0] = 0x03;
-            W->len = MODBYTES_XXX + 1;
+            W->len = MODBYTES_B256_56 + 1;
         } else {
             W->val[0] = 0x04;
-            W->len = 2 * MODBYTES_XXX + 1;
-            BIG_toBytes(&(W->val[MODBYTES_XXX + 1]), y);
+            W->len = 2 * MODBYTES_B256_56 + 1;
+            BIG_toBytes(&(W->val[MODBYTES_B256_56 + 1]), y);
         }
     }
 #endif
@@ -491,9 +491,9 @@ void ZZZ::ECP_toOctet(octet *W, ECP *P, bool compress)
 
 /* SU=88 */
 /* Restore P from octet string */
-int ZZZ::ECP_fromOctet(ECP *P, octet *W)
+int Ed25519::ECP_fromOctet(ECP *P, octet *W)
 {
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     BIG x;
     BIG_fromBytes(x, &(W->val[0]));
     if (ECP_set(P, x)) return 1;
@@ -504,7 +504,7 @@ int ZZZ::ECP_fromOctet(ECP *P, octet *W)
     int sgn,cmp,typ = W->val[0];
 
 #if (MBITS-1)%8 <= 4
-#ifdef ALLOW_ALT_COMPRESS_ZZZ
+#ifdef ALLOW_ALT_COMPRESS_Ed25519
     alt=true;
 #endif
 #endif
@@ -516,7 +516,7 @@ int ZZZ::ECP_fromOctet(ECP *P, octet *W)
         W->val[0]=typ;
         if ((typ&0x80)==0)
         {
-            BIG_fromBytes(y, &(W->val[MODBYTES_XXX]));
+            BIG_fromBytes(y, &(W->val[MODBYTES_B256_56]));
             if (ECP_set(P, x, y)) return 1;
             return 0;
         } else {
@@ -531,7 +531,7 @@ int ZZZ::ECP_fromOctet(ECP *P, octet *W)
         BIG_fromBytes(x, &(W->val[1]));
         if (typ == 0x04)
         {
-            BIG_fromBytes(y, &(W->val[MODBYTES_XXX + 1]));
+            BIG_fromBytes(y, &(W->val[MODBYTES_B256_56 + 1]));
             if (ECP_set(P, x, y)) return 1;
         }
         if (typ == 0x02 || typ == 0x03)
@@ -546,12 +546,12 @@ int ZZZ::ECP_fromOctet(ECP *P, octet *W)
 
 /* Set P=2P */
 /* SU=272 */
-void ZZZ::ECP_dbl(ECP *P)
+void Ed25519::ECP_dbl(ECP *P)
 {
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
     FP t0, t1, t2, t3, x3, y3, z3, b;
 
-#if CURVE_A_ZZZ == 0
+#if CURVE_A_Ed25519 == 0
 
         FP_sqr(&t0, &(P->y));                   //t0.sqr();
         FP_mul(&t1, &(P->y), &(P->z));          //t1.mul(z);
@@ -658,7 +658,7 @@ void ZZZ::ECP_dbl(ECP *P)
 #endif
 #endif
 
-#if CURVETYPE_ZZZ==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
     /* Not using square for multiplication swap, as (1) it needs more adds, and (2) it triggers more reductions */
 
     FP C, D, H, J;
@@ -669,7 +669,7 @@ void ZZZ::ECP_dbl(ECP *P)
 
     FP_sqr(&D, &(P->y));                        //D.sqr();
 
-#if CURVE_A_ZZZ == -1    
+#if CURVE_A_Ed25519 == -1    
     FP_neg(&C, &C);             //  C.neg();
 #endif
     FP_add(&(P->y), &C, &D);    //y.add(D);
@@ -689,7 +689,7 @@ void ZZZ::ECP_dbl(ECP *P)
 
 #endif
 
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     FP A, B, AA, BB, C;
 
     FP_add(&A, &(P->x), &(P->z));   //A.add(z);
@@ -702,7 +702,7 @@ void ZZZ::ECP_dbl(ECP *P)
     FP_norm(&C);                    //C.norm();
     FP_mul(&(P->x), &AA, &BB);      //x.mul(BB);
 
-    FP_imul(&A, &C, (CURVE_A_ZZZ + 2) / 4); //A.imul((ROM.CURVE_A+2)/4);
+    FP_imul(&A, &C, (CURVE_A_Ed25519 + 2) / 4); //A.imul((ROM.CURVE_A+2)/4);
 
     FP_add(&BB, &BB, &A);           //BB.add(A);
     FP_norm(&BB);                   //BB.norm();
@@ -711,10 +711,10 @@ void ZZZ::ECP_dbl(ECP *P)
 #endif
 }
 
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
 
 /* Set P+=Q. W is difference between P and Q and is affine */
-void ZZZ::ECP_add(ECP *P, ECP *Q, ECP *W)
+void Ed25519::ECP_add(ECP *P, ECP *Q, ECP *W)
 {
     FP A, B, C, D, DA, CB;
 
@@ -746,14 +746,14 @@ void ZZZ::ECP_add(ECP *P, ECP *Q, ECP *W)
 
 /* Set P+=Q */
 /* SU=248 */
-void ZZZ::ECP_add(ECP *P, ECP *Q)
+void Ed25519::ECP_add(ECP *P, ECP *Q)
 {
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
 
     int b3;
     FP t0, t1, t2, t3, t4, x3, y3, z3, b;
 
-#if CURVE_A_ZZZ == 0
+#if CURVE_A_Ed25519 == 0
         b3 = 3 * CURVE_B_I;             //int b=3*ROM.CURVE_B_I;
         FP_mul(&t0, &(P->x), &(Q->x));      //t0.mul(Q.x);
         FP_mul(&t1, &(P->y), &(Q->y));      //t1.mul(Q.y);
@@ -917,7 +917,7 @@ void ZZZ::ECP_add(ECP *P, ECP *Q)
     FP_sub(&F, &B, &E);         //F.sub(E);
     FP_add(&G, &B, &E);         //G.add(E);
 
-#if CURVE_A_ZZZ == 1
+#if CURVE_A_Ed25519 == 1
     FP_sub(&E, &D, &C);     //E.sub(C);
 #endif
     FP_add(&C, &C, &D);         //C.add(D);
@@ -934,12 +934,12 @@ void ZZZ::ECP_add(ECP *P, ECP *Q)
     FP_mul(&(P->x), &A, &B); //x.mul(B);
     FP_norm(&G);                //G.norm();
 
-#if CURVE_A_ZZZ == 1
+#if CURVE_A_Ed25519 == 1
     FP_norm(&E);            //E.norm();
     FP_mul(&C, &E, &G);     //C.mul(G);
 #endif
 
-#if CURVE_A_ZZZ == -1
+#if CURVE_A_Ed25519 == -1
     FP_norm(&C);            //C.norm();
     FP_mul(&C, &C, &G);     //C.mul(G);
 #endif
@@ -951,7 +951,7 @@ void ZZZ::ECP_add(ECP *P, ECP *Q)
 
 /* Set P-=Q */
 /* SU=16 */
-void  ZZZ::ECP_sub(ECP *P, ECP *Q)
+void  Ed25519::ECP_sub(ECP *P, ECP *Q)
 {
     ECP NQ;
     ECP_copy(&NQ, Q);
@@ -961,9 +961,9 @@ void  ZZZ::ECP_sub(ECP *P, ECP *Q)
 
 #endif
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 /* constant time multiply by small integer of length bts - use ladder */
-void ZZZ::ECP_pinmul(ECP *P, int e, int bts)
+void Ed25519::ECP_pinmul(ECP *P, int e, int bts)
 {
     int i, b;
     ECP R0, R1;
@@ -996,19 +996,19 @@ void ZZZ::ECP_pinmul(ECP *P, int e, int bts)
 // The point multiplication methods used will process leading zeros correctly.
 
 // So this function leaks information about the length of e...
-void ZZZ::ECP_mul(ECP *P,BIG e)
+void Ed25519::ECP_mul(ECP *P,BIG e)
 {
     ECP_clmul(P,e,e);
 }
 
 // .. but this one does not (typically set maxe=r)
 // Set P=e*P 
-void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
+void Ed25519::ECP_clmul(ECP *P, BIG e, BIG maxe)
 {
     BIG cm;
     BIG_or(cm,e,maxe);
     int max=BIG_nbits(cm);
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
     /* Montgomery ladder */
     int nb, i, b;
     ECP R0, R1, D;
@@ -1046,7 +1046,7 @@ void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
     int i, nb, s, ns;
     BIG mt, t;
     ECP Q, W[8], C;
-    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 3) / 4];
+    sign8 w[1 + (NLEN_B256_56 * BASEBITS_B256_56 + 3) / 4];
 
     if (ECP_isinf(P)) return;
     if (BIG_iszilch(e))
@@ -1104,11 +1104,11 @@ void ZZZ::ECP_clmul(ECP *P, BIG e, BIG maxe)
 #endif
 }
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 
 // Generic multi-multiplication, fixed 4-bit window, P=Sigma e_i*X_i
 // m point doublings
-void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
+void Ed25519::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
 {
     int i,j,k,nb;
     BIG t,mt;
@@ -1146,7 +1146,7 @@ void ZZZ::ECP_muln(ECP *P,int n,ECP X[],BIG e[])
     }
 }
 
-void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
+void Ed25519::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
 {
     ECP_clmul2(P,Q,e,f,e);
 }
@@ -1155,12 +1155,12 @@ void ZZZ::ECP_mul2(ECP *P, ECP *Q, BIG e, BIG f)
 /* constant time - as useful for GLV method in pairings */
 /* SU=456 */
 
-void ZZZ::ECP_clmul2(ECP *P, ECP *Q, BIG e, BIG f, BIG maxe)
+void Ed25519::ECP_clmul2(ECP *P, ECP *Q, BIG e, BIG f, BIG maxe)
 {
     BIG cm;
     BIG te, tf, mt;
     ECP S, T, W[8], C;
-    sign8 w[1 + (NLEN_XXX * BASEBITS_XXX + 1) / 2];
+    sign8 w[1 + (NLEN_B256_56 * BASEBITS_B256_56 + 1) / 2];
     int i, a, b, s, ns, nb;
 
     BIG_copy(cm,maxe); BIG_or(cm,cm,e); BIG_or(cm,cm,f);
@@ -1248,7 +1248,7 @@ void ZZZ::ECP_clmul2(ECP *P, ECP *Q, BIG e, BIG f, BIG maxe)
 
 #endif
 
-void ZZZ::ECP_cfp(ECP *P)
+void Ed25519::ECP_cfp(ECP *P)
 {   /* multiply point by curves cofactor */
     BIG c;
     int cf = CURVE_Cof_I;
@@ -1272,24 +1272,24 @@ void ZZZ::ECP_cfp(ECP *P)
 }
 
 /* Constant time Map to Point */
-void ZZZ::ECP_map2point(ECP *P,FP *h)
+void Ed25519::ECP_map2point(ECP *P,FP *h)
 {
-#if CURVETYPE_ZZZ==MONTGOMERY
+#if CURVETYPE_Ed25519==MONTGOMERY
 // Elligator 2
     int qres;
     BIG a;
     FP X1,X2,w,N,t,one,A,D,hint;
     //BIG_zero(a); BIG_inc(a,CURVE_A); BIG_norm(a); FP_nres(&A,a);
-    FP_from_int(&A,CURVE_A_ZZZ);
+    FP_from_int(&A,CURVE_A_Ed25519);
     FP_copy(&t,h);
     FP_sqr(&t,&t);   // t^2
 
-    if (PM1D2_YYY == 2)
+    if (PM1D2_F25519 == 2)
          FP_add(&t,&t,&t);  // 2t^2
-    if (PM1D2_YYY == 1)
+    if (PM1D2_F25519 == 1)
         FP_neg(&t,&t);      // -t^2
-    if (PM1D2_YYY > 2)
-        FP_imul(&t,&t,QNRI_YYY); // precomputed QNR
+    if (PM1D2_F25519 > 2)
+        FP_imul(&t,&t,QNRI_F25519); // precomputed QNR
     FP_norm(&t);  // z.t^2
 
     FP_one(&one);
@@ -1319,20 +1319,20 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     ECP_set(P,a);
     return;
 #endif
-#if CURVETYPE_ZZZ==EDWARDS
+#if CURVETYPE_Ed25519==EDWARDS
 // Elligator 2 - map to Montgomery, place point, map back
     int qres,ne,rfc,qnr;
     BIG x,y;
     FP X1,X2,t,w,one,A,w1,w2,B,Y,K,D,hint;
     FP_one(&one);
 
-#if MODTYPE_YYY != GENERALISED_MERSENNE
+#if MODTYPE_F25519 != GENERALISED_MERSENNE
 // its NOT ed448!
 // Figure out the Montgomery curve parameters
 
     FP_rcopy(&B,CURVE_B);
 
-#if CURVE_A_ZZZ == 1
+#if CURVE_A_Ed25519 == 1
     FP_add(&A,&B,&one);  // A=B+1  // A = a+d
     FP_sub(&B,&B,&one);  // B=B-1  // B = -a+d
 #else
@@ -1349,7 +1349,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     //FP_inv(&K,&K,NULL);    // K
     FP_invsqrt(&K,&w1,&K);                      // *** return K, w1=sqrt(1/K) - - could be precalculated!
 
-    rfc=RIADZ_YYY;
+    rfc=RIADZ_F25519;
     if (rfc)
     { // RFC7748 method applies
         FP_mul(&A,&A,&K);   // = J
@@ -1367,20 +1367,20 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_copy(&t,h); 
     FP_sqr(&t,&t);   // t^2
 
-    if (PM1D2_YYY == 2)
+    if (PM1D2_F25519 == 2)
     {
         FP_add(&t,&t,&t);  // 2t^2
         qnr=2;
     }
-    if (PM1D2_YYY == 1)
+    if (PM1D2_F25519 == 1)
     {
         FP_neg(&t,&t);      // -t^2
         qnr=-1;
     }
-    if (PM1D2_YYY > 2)
+    if (PM1D2_F25519 > 2)
     {
-        FP_imul(&t,&t,QNRI_YYY);  // precomputed QNR
-        qnr=QNRI_YYY;
+        FP_imul(&t,&t,QNRI_F25519);  // precomputed QNR
+        qnr=QNRI_F25519;
     }
     FP_norm(&t);
     FP_add(&D,&t,&one); FP_norm(&D);  // Denominator=(1+z.u^2)
@@ -1436,7 +1436,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&Y,&Y,&K);
     }
 
-#if MODTYPE_YYY == GENERALISED_MERSENNE
+#if MODTYPE_F25519 == GENERALISED_MERSENNE
 // Ed448 isogeny
     FP_sqr(&t,&X1);  // t=u^2
     FP_add(&w,&t,&one); // w=u^2+1
@@ -1491,22 +1491,22 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
 #endif
 
-#if CURVETYPE_ZZZ==WEIERSTRASS
+#if CURVETYPE_Ed25519==WEIERSTRASS
 // SSWU or SVDW method
     int sgn,ne;
     BIG a,x,y;
     FP X1,X2,X3,t,w,one,A,B,Y,D;
     FP D2,hint,GX1;
 
-#if HTC_ISO_ZZZ != 0
+#if HTC_ISO_Ed25519 != 0
 // Map to point on isogenous curve
-    int i,k,isox,isoy,iso=HTC_ISO_ZZZ;
+    int i,k,isox,isoy,iso=HTC_ISO_Ed25519;
     FP xnum,xden,ynum,yden;
     BIG z;
     FP_rcopy(&A,CURVE_Ad);
     FP_rcopy(&B,CURVE_Bd);
 #else
-    FP_from_int(&A,CURVE_A_ZZZ);
+    FP_from_int(&A,CURVE_A_Ed25519);
     FP_rcopy(&B,CURVE_B);
 #endif
 
@@ -1514,10 +1514,10 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
     FP_copy(&t,h);
     sgn=FP_sign(&t);
 
-#if CURVE_A_ZZZ != 0 || HTC_ISO_ZZZ != 0
+#if CURVE_A_Ed25519 != 0 || HTC_ISO_Ed25519 != 0
 
         FP_sqr(&t,&t);
-        FP_imul(&t,&t,RIADZ_YYY);  // Z from hash-to-point draft standard
+        FP_imul(&t,&t,RIADZ_F25519);  // Z from hash-to-point draft standard
         FP_add(&w,&t,&one);     // w=Zt^2+1
         FP_norm(&w);
 
@@ -1546,7 +1546,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_sqr(&D2,&D);
 
         FP_mul(&D,&D2,&t);
-        FP_imul(&t,&w,RIADZ_YYY);
+        FP_imul(&t,&w,RIADZ_F25519);
         FP_rcopy(&X1,CURVE_HTPC);     
         FP_mul(&X1,&X1,&hint); // modify hint
 
@@ -1562,7 +1562,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_neg(&w,&Y); FP_norm(&w);
         FP_cmove(&Y,&w,ne);
 
-#if HTC_ISO_ZZZ != 0
+#if HTC_ISO_Ed25519 != 0
 
 // (X2,Y) is on isogenous curve
         k=0;
@@ -1632,10 +1632,10 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 #endif
 #else 
 // SVDW - Shallue and van de Woestijne
-        FP_from_int(&Y,RIADZ_YYY);
+        FP_from_int(&Y,RIADZ_F25519);
         ECP_rhs(&A,&Y);  // A=g(Z)
         FP_rcopy(&B,SQRTm3);
-        FP_imul(&B,&B,RIADZ_YYY); // B=Z*sqrt(-3)
+        FP_imul(&B,&B,RIADZ_F25519); // B=Z*sqrt(-3)
 
         FP_sqr(&t,&t);
         FP_mul(&Y,&A,&t);   // Y=tv1=u^2*g(Z)
@@ -1658,7 +1658,7 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
         FP_mul(&w,&w,&Y);   // tv1
         FP_mul(&w,&w,&D);  // tv3   // tv5=u*tv1*tv3*tv4*Z*sqrt(-3)
 
-        FP_from_int(&X1,RIADZ_YYY);
+        FP_from_int(&X1,RIADZ_F25519);
         FP_copy(&X3,&X1);
         FP_neg(&X1,&X1); FP_norm(&X1); FP_div2(&X1,&X1); // -Z/2
         FP_copy(&X2,&X1);
@@ -1695,13 +1695,13 @@ void ZZZ::ECP_map2point(ECP *P,FP *h)
 
 /* Hunt and Peck a BIG to a curve point */
 /*
-void ZZZ::ECP_hap2point(ECP *P,BIG h)
+void Ed25519::ECP_hap2point(ECP *P,BIG h)
 {
     BIG x;
     BIG_copy(x,h);
 	for (;;)
 	{
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
 		ECP_setx(P,x,0);
 #else
 		ECP_set(P,x);
@@ -1713,7 +1713,7 @@ void ZZZ::ECP_hap2point(ECP *P,BIG h)
 */
 /* Map octet to point */
 /*
-void ZZZ::ECP_mapit(ECP *P, octet *W)
+void Ed25519::ECP_mapit(ECP *P, octet *W)
 {
     BIG q, x;
     DBIG dx;
@@ -1726,11 +1726,11 @@ void ZZZ::ECP_mapit(ECP *P, octet *W)
     ECP_cfp(P);
 }
 */
-int ZZZ::ECP_generator(ECP *G)
+int Ed25519::ECP_generator(ECP *G)
 {
     BIG x, y;
     BIG_rcopy(x, CURVE_Gx);
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     BIG_rcopy(y, CURVE_Gy);
     return ECP_set(G, x, y);
 #else
@@ -1740,7 +1740,7 @@ int ZZZ::ECP_generator(ECP *G)
 
 #ifdef HAS_MAIN
 
-using namespace ZZZ;
+using namespace Ed25519;
 
 int main()
 {
@@ -1749,7 +1749,7 @@ int main()
     csprng RNG;
     BIG r, s, x, y, b, m, w, q;
     BIG_rcopy(x, CURVE_Gx);
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     BIG_rcopy(y, CURVE_Gy);
 #endif
     BIG_rcopy(m, Modulus);
@@ -1757,14 +1757,14 @@ int main()
     printf("x= ");
     BIG_output(x);
     printf("\n");
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     printf("y= ");
     BIG_output(y);
     printf("\n");
 #endif
     RNG_seed(&RNG, 3, "abc");
 
-#if CURVETYPE_ZZZ!=MONTGOMERY
+#if CURVETYPE_Ed25519!=MONTGOMERY
     ECP_set(&G, x, y);
 #else
     ECP_set(&G, x);
