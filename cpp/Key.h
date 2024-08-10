@@ -7,17 +7,17 @@
 
 class Key{
     private:
-        int privateKey;
-        int publicKey; // will change
+        octet privateKey;
+        octet publicKey; // will change
     public:
         Key();
-        Key(int privateKey);
-        int getPrivateKey();
-        int getPublicKey();
-        void setPrivateKey(int privateKey);
-        void setPublicKey(int publicKey);
+        Key(octet privateKey);
+        octet getPrivateKey();
+        octet getPublicKey();
+        void setPrivateKey(octet privateKey);
+        void setPublicKey(octet publicKey);
 
         void PointGeneration(Ed25519::ECP G);
-        int generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *generatorPoint);
-        int generatePrivateKey(csprng *randomNumberGenerator, octet *secretKey);
+        int generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *generatorPooctet);
+        int generatePrivateKey(csprng *randomNumberGenerator, octet *PrivateKey);
 };
