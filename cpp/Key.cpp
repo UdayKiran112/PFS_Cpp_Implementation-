@@ -1,23 +1,23 @@
 #include <bits/stdc++.h>
 #include "Key.h"
 using namespace std;
-Key::Key(){
-
+Key::Key()
+{
 }
-Key::Key(int privateKey){
-
+Key::Key(int privateKey)
+{
 }
-int Key::getPrivateKey(){
-
+int Key::getPrivateKey()
+{
 }
-int Key::getPublicKey(){
-
+int Key::getPublicKey()
+{
 }
-void Key::setPrivateKey(int privateKey){
-
+void Key::setPrivateKey(int privateKey)
+{
 }
-void Key::setPublicKey(int publicKey){
-
+void Key::setPublicKey(int publicKey)
+{
 }
 
 /**
@@ -30,7 +30,7 @@ void Key::setPublicKey(int publicKey){
 void Key::PointGeneration(Ed25519::ECP G)
 {
     using namespace Ed25519;
-    
+
     ECP P;
     ECP_generator(&P);
     if (ECP_isinf(&P) == 1)
@@ -125,4 +125,31 @@ int Key::generatePublicKey(octet *secretKey, octet *publicKey, Ed25519::ECP *gen
         return -1;
     }
     return res;
+}
+
+void Hash_Function(octet *input, octet *output, int pad)
+{
+    using namespace core;
+    using namespace Ed25519;
+    using namespace B256_56;
+    using namespace F25519;
+    /* The 'n' argument is unused in this function. It is likely that it was included as a placeholder for a future
+       modification that would involve a third parameter. The 'n' value is not used in any of the cases of the switch
+       statement. The 'n' value is instead used in the default case, which is an empty case and therefore does not
+       have any effect on the function.
+
+       Therefore, the 'n' argument can be safely removed from the function signature without affecting the behavior
+       of the code. */
+    int n = -1;
+    GPhash(SHA256, 32, output, 32, pad, input, n, NULL);
+
+    // Map octet hash to Zp*
+    BIG x, prime;
+    BIG_fromBytes(x, output->val); // Convert hash bytes to BIG number
+    BIG_zero(prime);               // Initialize BIG 'prime' to zero
+    BIG_rcopy(prime, Modulus);     // Copy the constant Modulus value to 'prime'
+    BIG_mod(x, prime);             // Take x mod prime
+    BIG_toBytes(output->val, x);   // Convert the BIG number back to bytes
+
+    cout << "Hashed" << endl;
 }
