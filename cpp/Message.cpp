@@ -98,3 +98,20 @@ void Message::concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet
     Concatenate_octet(&p1, &p2, result);
     cout << "Concatenated" << endl;
 }
+
+
+void Message::timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result)
+{
+    using namespace chrono;
+    auto time_since_epoch = timeStamp.time_since_epoch();
+    auto millis = duration_cast<milliseconds>(time_since_epoch).count();
+    result->len = 8;
+    result->max = 8;
+    result->val = new char[8];
+    unsigned char* ptr = (unsigned char*)result->val;
+    for (int i = 7; i >= 0; i--)
+    {
+        ptr[i] = millis & 0xFF;
+        millis >>= 8;
+    }
+}

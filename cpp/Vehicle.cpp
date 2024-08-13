@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include "Vehicle.h"
-#include "Key.h"
+#include "Message.h"
 using namespace std;
 
 Vehicle::Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA ta)
@@ -203,33 +203,61 @@ static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *mess
 
 #define T_replay 1000 // Define T_replay with an appropriate value
 
-static bool Validate_Message(Ed25519::ECP *GeneratorPoint,octet* signedMessage,Ed25519::ECP *PublicKey,Ed25519::ECP * VehiclePublicKey,Ed25519::ECP *B,Ed25519::ECP *A,chrono::system_clock::time_point timeStamp,octet* Message)
+static bool Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message)
 {
-    using namespace Ed25519;
     using namespace B256_56;
-    using namespace core;
-    auto now = std::chrono::system_clock::now();
-    if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay)
-    {
+    auto now = chrono::system_clock::now();
+    if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay) {
         return false;
     }
 
-    ECP LHS,RHS,P,Apoint,Bpoint,PubKey,VehPubKey;
+    // Initialize ECP variables
+    ECP LHS, RHS, P, Apoint, Bpoint, PubKey, VehPubKey;
     ECP_copy(&P, GeneratorPoint);
+
+    // Compute LHS
     BIG signedMessageHash;
     BIG_fromBytes(signedMessageHash, signedMessage->val);
     ECP_mul(&P, signedMessageHash);
-    ECP_copy(&LHS, &P); // LHS = (hashed_message *P));
-    ECP_copy(&RHS, &PubKey); // RHS = (GK));
-    ECP_add(&RHS,&VehPubKey); // RHS = (GK+ PKi));
-    BIG A_hash,B_hash;
-    ECP_add(&VehPubKey,&Apoint);// PKi||A;
-    octet A_hash_octet; // start an instance of octet to put hash value
-    ECP_toOctet(&A_hash_octet, &VehPubKey, true); // convert PKi||A to octet
+    ECP_copy(&LHS, &P);
 
-    // Function has to be edited still
+    // Compute RHS partially -> GK + PKi
+    ECP_copy(&RHS, PublicKey);
+    ECP_add(&RHS, VehiclePublicKey);
 
+    // Apoint calculation->A*H(PKi || A)
+    ECP_add(VehiclePublicKey, A);
+    octet A_hash_octet;
+    ECP_toOctet(&A_hash_octet, VehiclePublicKey, true);
+    octet Hash_A_out;
+    Message::Hash_Function(&A_hash_octet, &Hash_A_out, 0);
+    BIG A_hash;
     BIG_fromBytes(A_hash, A_hash_octet.val);
-    bool eq = ECP_equals;
+    ECP_mul(A, A_hash);
+
+    // Bpoint calculation -> B*H(M|| T || B)
+    ECP_copy(&Bpoint, B);
+    octet result, B_octet, B_hash_octet;
+    ECP_toOctet(&B_octet, &Bpoint, true);
+    Message::Concatenate_octet(Message, &B_octet, &result);
+    octet timestamp_oct;
+    Message::timestamp_to_octet(timeStamp, &timestamp_oct);
+    Message::Concatenate_octet(&result, &timestamp_oct, &result);
+    Message::Hash_Function(&result, &B_hash_octet, 0);
+    BIG B_hash;
+    BIG_fromBytes(B_hash, B_hash_octet.val);
+    ECP_mul(&Bpoint, B_hash);
+
+    // Final RHS calculation
+    ECP_add(&RHS, &Bpoint);
+    ECP_add(&RHS, A);
+
+    // Compare LHS and RHS
+    if (!ECP_equals(&LHS, &RHS)) {
+        cout << "Message has been Compromised\n";
+        return false;
+    }
+
     return true;
 }
+
