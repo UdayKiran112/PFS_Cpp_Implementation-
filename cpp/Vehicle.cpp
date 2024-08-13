@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include "Vehicle.h"
+#include "Key.h"
 using namespace std;
 
 Vehicle::Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA ta)
@@ -129,37 +130,38 @@ void Vehicle::sendingMessage(int vehiclePrivateKey, int signatureKey, Message me
     delete[] msg;
 }
 
+// Irrevelant function code unnecessarily
 
-void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, int A /*public key datatype*/, int senderPublicKey)
-{
-    // TODO
+// void Vehicle::validateMessage(Message message, int signatureKey /*prolly BIG*/, int A /*public key datatype*/, int senderPublicKey)
+// {
+//     // TODO
 
-    auto timestamp = message.getTimestamp();
-    if (!Validate_Message(timestamp))
-    {
-        cout << "Message has Expired\n";
-        return;
-    }
+//     auto timestamp = message.getTimestamp();
+//     if (!Validate_Message(timestamp))
+//     {
+//         cout << "Message has Expired\n";
+//         return;
+//     }
 
-    octet Q,M, SIG;
+//     octet Q,M, SIG;
 
-    string s = message.getMessage();
-    char *msg = StrtoCharstar(s);
-    if (!msg) {
-        cout << "Failed to convert message to char*";
-        return;
-    }
-    Q = {};
-    M = {static_cast<int>(s.length()), static_cast<int>(s.length()), msg};
-    SIG = {sizeof(signatureKey), sizeof(signatureKey), reinterpret_cast<char*>(&signatureKey)};
+//     string s = message.getMessage();
+//     char *msg = StrtoCharstar(s);
+//     if (!msg) {
+//         cout << "Failed to convert message to char*";
+//         return;
+//     }
+//     Q = {};
+//     M = {static_cast<int>(s.length()), static_cast<int>(s.length()), msg};
+//     SIG = {sizeof(signatureKey), sizeof(signatureKey), reinterpret_cast<char*>(&signatureKey)};
 
-    bool verify = verifyMessage(false, &Q, NULL, &M, &SIG);
+//     bool verify = verifyMessage(false, &Q, NULL, &M, &SIG);
 
-    if(!verify) {
-        cout << "Message has been Comprimised\n";
-        delete[] msg;
-    }
-}
+//     if(!verify) {
+//         cout << "Message has been Comprimised\n";
+//         delete[] msg;
+//     }
+// }
 
 /**
  * Signs a message using the Ed25519 algorithm.
@@ -201,13 +203,33 @@ static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *mess
 
 #define T_replay 1000 // Define T_replay with an appropriate value
 
-static bool Validate_Message(chrono::system_clock::time_point timeStamp)
+static bool Validate_Message(Ed25519::ECP *GeneratorPoint,octet* signedMessage,Ed25519::ECP *PublicKey,Ed25519::ECP * VehiclePublicKey,Ed25519::ECP *B,Ed25519::ECP *A,chrono::system_clock::time_point timeStamp,octet* Message)
 {
+    using namespace Ed25519;
+    using namespace B256_56;
+    using namespace core;
     auto now = std::chrono::system_clock::now();
     if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay)
     {
         return false;
     }
+
+    ECP LHS,RHS,P,Apoint,Bpoint,PubKey,VehPubKey;
+    ECP_copy(&P, GeneratorPoint);
+    BIG signedMessageHash;
+    BIG_fromBytes(signedMessageHash, signedMessage->val);
+    ECP_mul(&P, signedMessageHash);
+    ECP_copy(&LHS, &P); // LHS = (hashed_message *P));
+    ECP_copy(&RHS, &PubKey); // RHS = (GK));
+    ECP_add(&RHS,&VehPubKey); // RHS = (GK+ PKi));
+    BIG A_hash,B_hash;
+    ECP_add(&VehPubKey,&Apoint);// PKi||A;
+    octet A_hash_octet; // start an instance of octet to put hash value
+    ECP_toOctet(&A_hash_octet, &VehPubKey, true); // convert PKi||A to octet
+
     // Function has to be edited still
+
+    BIG_fromBytes(A_hash, A_hash_octet.val);
+    bool eq = ECP_equals;
     return true;
 }
