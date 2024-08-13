@@ -121,8 +121,11 @@ void Hash_Function(octet *input, octet *output, int pad)
     BIG_zero(prime);               // Initialize BIG 'prime' to zero
     BIG_rcopy(prime, Modulus);     // Copy the constant Modulus value to 'prime'
     BIG_mod(x, prime);             // Take x mod prime
+    output->len = 32;
+    output->max = 32;
+    output->val = new char[32];
     BIG_toBytes(output->val, x);   // Convert the BIG number back to bytes
-
+    
     cout << "Hashed" << endl;
 }
 
@@ -135,6 +138,7 @@ void Concatenate_octet(octet *data1, octet *data2, octet *result)
     memcpy(result->val + data1->len, data2->val, data2->len);
 }
 
+// Concatenate two BIG numbers
 void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result)
 {
     using namespace B256_56;
