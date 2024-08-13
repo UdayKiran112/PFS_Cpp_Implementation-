@@ -18,6 +18,7 @@ class Vehicle{
         
     public:
         Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA ta);
+        Vehicle();
         int getRegistrationId();
         Key getVehicleKey();
         int getSignatureKey();

@@ -1,21 +1,30 @@
 #include <bits/stdc++.h>
-using namespace std;
+#include "Lib/core.h"
+#include "Lib/eddsa_Ed25519.h"
+#include "Lib/config_big_B256_56.h"
+
+// using namespace std;
 
 class Message{
     private:
         string message;
         chrono::system_clock::time_point Timestamp;
-        int B; // Public Key Type
-        int hashMsg; //64 bitss less than multiple of 512 bits
+        core::octet B; // Public Key Type
+        core::octet hashMsg; //64 bitss less than multiple of 512 bits
     public:
         Message();
-        Message(string message, chrono::system_clock::time_point Timestamp, int B, int hashMsg);
+        Message(string message, chrono::system_clock::time_point Timestamp, core::octet B, core::octet hashMsg);
         string getMessage();
         chrono::system_clock::time_point getTimestamp();
-        int getB();
-        int getHashMsg();
+        core::octet getB();
+        core::octet getHashMsg();
         void setMessage(string message);
         void setTimestamp(chrono::system_clock::time_point Timestamp);
-        void setB(int B);
-        void setHashMsg(int hashMsg);
+        void setB(core::octet B);
+        void setHashMsg(core::octet hashMsg);
+
+        static void Concatenate_octet(octet *data1, octet *data2, octet *result);
+        static void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result);
+        static void Hash_Function(octet *input, octet *output, int pad);
+
 };
