@@ -18,5 +18,5 @@ class TA{
         vector<pair<octet, octet>> getDictionary();
         void setDictionary(vector<pair<octet, octet>> dictionary);
         bool checkRegValid(octet registrationId);
-        static bool signatureGeneration();
+        // static bool signatureGeneration();
 };

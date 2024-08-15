@@ -12,7 +12,7 @@ TA::TA(csprng *RNG)
 
 void TA::validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
-    auto regValid = checkRegValid(registrationId);
+    auto regValid = checkRegValid(*registrationId);
     if (!regValid)
     {
         cout << "Registration ID is not valid" << endl;
@@ -23,7 +23,8 @@ void TA::validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *
     dict.push_back(make_pair(*registrationId, *vehiclePublicKey));
     this->setDictionary(dict);
     // generate signatureKey and A
-    bool sigGen = signatureGeneration(&(this->getGroupKey().getPrivateKey()), vehiclePublicKey, SignatureKey, A);
+    auto temp = this->getGroupKey().getPrivateKey();
+    bool sigGen = signatureGeneration(&temp, vehiclePublicKey, SignatureKey, A);
 }
 
 void TA::setGroupKey(Key groupKey)
@@ -81,7 +82,8 @@ static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey,
     result.val = new char[result.max];
 
     // Concatenate vehicle public key and random private key
-    Message::Concatenate_octet(vehiclePublicKey, &(randomKey.getPrivateKey()), &result);
+    auto temp = randomKey.getPrivateKey();
+    Message::Concatenate_octet(vehiclePublicKey, &temp, &result);
 
     // Hash the concatenated result into SignatureKey
     Message::Hash_Function(&result, SignatureKey, 0);
