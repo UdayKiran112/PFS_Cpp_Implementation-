@@ -4,6 +4,7 @@
 using namespace std;
 
 bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature);
+void sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message);
 
 Vehicle::Vehicle(octet registrationId, Key vehicleKey, octet signatureKey, octet A, TA ta)
 {
@@ -88,7 +89,7 @@ static char *StrtoCharstar(string s)
     return c;
 }
 
-void Vehicle::sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message){
+void sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message){
     char q[EFS_Ed25519], sig[2 * EFS_Ed25519];
 
     octet D = {sizeof(int), sizeof(int), reinterpret_cast<char*>(&vehiclePrivateKey)};

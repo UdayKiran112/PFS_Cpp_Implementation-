@@ -17,6 +17,5 @@ class TA{
         Key getGroupKey();
         vector<pair<octet, octet>> getDictionary();
         void setDictionary(vector<pair<octet, octet>> dictionary);
-        bool checkRegValid(octet registrationId);
         // static bool signatureGeneration();
 };

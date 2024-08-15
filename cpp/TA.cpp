@@ -3,6 +3,7 @@
 using namespace std;
 
 static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
+bool checkRegValid(octet *registrationId);
 
 TA::TA() {}
 
@@ -14,7 +15,7 @@ TA::TA(csprng *RNG)
 
 void TA::validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
-    auto regValid = checkRegValid(*registrationId);
+    auto regValid = checkRegValid(registrationId);
     if (!regValid)
     {
         cout << "Registration ID is not valid" << endl;
