@@ -60,7 +60,7 @@ void Message::Hash_Function(octet *input, octet *output, int pad){
        Therefore, the 'n' argument can be safely removed from the function signature without affecting the behavior
        of the code. */
     int n = -1;
-    GPhash(SHA256, 32, output, 32, pad, input, n, NULL);
+    GPhash(SHA256, 32, output, 32, pad, input, n, nullptr);
 
     // Map octet hash to Zp*
     BIG x, prime;

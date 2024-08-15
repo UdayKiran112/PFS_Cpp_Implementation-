@@ -204,7 +204,7 @@ void Ed25519::ECP_rhs(FP *v, FP *x)
     FP_neg(v, v);
 #endif
     FP_norm(v);
-    FP_inv(&t, &t, NULL);
+    FP_inv(&t, &t, nullptr);
     FP_mul(v, v, &t);
     FP_reduce(v);
 #endif
@@ -235,7 +235,7 @@ int Ed25519::ECP_set(ECP *P, BIG x)
 
     ECP_rhs(&rhs, &rhs);
 
-    if (!FP_qr(&rhs,NULL))
+    if (!FP_qr(&rhs,nullptr))
     {
         ECP_inf(P);
         return 0;
@@ -333,7 +333,7 @@ void Ed25519::ECP_affine(ECP *P)
     FP_one(&one);
     if (FP_equals(&(P->z), &one)) return;
 
-    FP_inv(&iz, &(P->z), NULL);
+    FP_inv(&iz, &(P->z), nullptr);
     FP_mul(&(P->x), &(P->x), &iz);
 
 #if CURVETYPE_Ed25519==EDWARDS || CURVETYPE_Ed25519==WEIERSTRASS
@@ -1346,7 +1346,7 @@ void Ed25519::ECP_map2point(ECP *P,FP *h)
     FP_div2(&B,&B);    // (B-A)/4     // (-a+d)/4 = -1/K
 
     FP_neg(&K,&B); FP_norm(&K);
-    //FP_inv(&K,&K,NULL);    // K
+    //FP_inv(&K,&K,nullptr);    // K
     FP_invsqrt(&K,&w1,&K);                      // *** return K, w1=sqrt(1/K) - - could be precalculated!
 
     rfc=RIADZ_F25519;
@@ -1354,7 +1354,7 @@ void Ed25519::ECP_map2point(ECP *P,FP *h)
     { // RFC7748 method applies
         FP_mul(&A,&A,&K);   // = J
         FP_mul(&K,&K,&w1);
-//        FP_sqrt(&K,&K,NULL);
+//        FP_sqrt(&K,&K,nullptr);
     } else { // generic method
         FP_sqr(&B,&B);
     }
@@ -1674,11 +1674,11 @@ void Ed25519::ECP_map2point(ECP *P,FP *h)
         FP_add(&X3,&X3,&A); FP_norm(&X3);
 
         ECP_rhs(&w,&X2);
-        FP_cmove(&X3,&X2,FP_qr(&w,NULL));                           // ***
+        FP_cmove(&X3,&X2,FP_qr(&w,nullptr));                           // ***
         ECP_rhs(&w,&X1);
-        FP_cmove(&X3,&X1,FP_qr(&w,NULL));                           // ***
+        FP_cmove(&X3,&X1,FP_qr(&w,nullptr));                           // ***
         ECP_rhs(&w,&X3);
-        FP_sqrt(&Y,&w,NULL);                                        // ***
+        FP_sqrt(&Y,&w,nullptr);                                        // ***
 
         ne=FP_sign(&Y)^sgn;
         FP_neg(&w,&Y); FP_norm(&w);

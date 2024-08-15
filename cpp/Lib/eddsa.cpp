@@ -112,7 +112,7 @@ static int H2(bool ph, octet *context, octet *R, octet *Q, octet *M, DBIG dr)
     char dom[64];
     octet DOM = {0, sizeof(dom), dom};
     int cl;
-    if (context == NULL)
+    if (context == nullptr)
         cl = 0;
     else
         cl = context->len & 0xff;
@@ -161,7 +161,7 @@ static void getR(bool ph, int b, char *digest, octet *context, octet *M, DBIG dr
     char dom[64];
     octet DOM = {0, sizeof(dom), dom};
     int cl;
-    if (context == NULL)
+    if (context == nullptr)
         cl = 0;
     else
         cl = context->len & 0xff;
@@ -307,7 +307,7 @@ static void decode(octet *W, Ed25519::ECP *P)
  * where D is the secret key and Q is the public key
  * and G is fixed generator.
  * RNG is a cryptographically strong RNG
- * If RNG==NULL, D is generated externally
+ * If RNG==nullptr, D is generated externally
  */
 int Ed25519::EDDSA_KEY_PAIR_GENERATE(csprng *RNG, octet *D, octet *Q)
 {
@@ -323,7 +323,7 @@ int Ed25519::EDDSA_KEY_PAIR_GENERATE(csprng *RNG, octet *D, octet *Q)
 
     ECP_generator(&G);
 
-    if (RNG != NULL)
+    if (RNG != nullptr)
         OCT_rand(D, RNG, b); // create random private key
 
     H(D, digest);
@@ -340,7 +340,7 @@ int Ed25519::EDDSA_KEY_PAIR_GENERATE(csprng *RNG, octet *D, octet *Q)
 
 // Generate a signature using key pair (D,Q) on message M
 // Set ph=true if message has already been pre-hashed
-// if ph=false, then context should be NULL for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-NULL or non-empty context
+// if ph=false, then context should be nullptr for ed25519. However RFC8032 mode ed25519ctx is supported by supplying a non-nullptr or non-empty context
 int Ed25519::EDDSA_SIGNATURE(bool ph, octet *D, octet *context, octet *M, octet *SIG)
 {
     DBIG dr;
@@ -356,7 +356,7 @@ int Ed25519::EDDSA_SIGNATURE(bool ph, octet *D, octet *context, octet *M, octet 
         index = 1; // extra byte needed for compression
     b = MODBYTES_B256_56 + index;
 
-    EDDSA_KEY_PAIR_GENERATE(NULL, D, &Q);
+    EDDSA_KEY_PAIR_GENERATE(nullptr, D, &Q);
 
     BIG_rcopy(q, CURVE_Order);
     ECP_generator(&R);
