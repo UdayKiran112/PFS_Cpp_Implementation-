@@ -1,3 +1,5 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include "Key.h"
 #include "TA.h"

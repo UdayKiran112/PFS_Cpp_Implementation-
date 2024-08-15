@@ -1,8 +1,9 @@
 #include <bits/stdc++.h>
 #include <chrono>
 #include "Vehicle.h"
-#include "Message.h"
 using namespace std;
+
+bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature);
 
 Vehicle::Vehicle(octet registrationId, Key vehicleKey, octet signatureKey, octet A, TA ta)
 {
@@ -71,13 +72,19 @@ void Vehicle::setTA(TA ta)
 
 using namespace core;
 using namespace Ed25519;
-void Vehicle::requestVerification()
-{
+void Vehicle::requestVerification() {
     octet signkey, virpubkey;
-    this->ta.validateRequest(&(this->registrationId), &(this->getVehicleKey().getPublicKey()), &signkey, &virpubkey);
+
+    // Store the result in a local variable first
+    octet publicKey = this->getVehicleKey().getPublicKey();
+
+    // Now you can safely take the address of the local variable
+    this->ta.validateRequest(&(this->registrationId), &publicKey, &signkey, &virpubkey);
+    
     this->setSignatureKey(signkey);
     this->setA(virpubkey);
 }
+
 
 static char *StrtoCharstar(string s)
 {
@@ -165,7 +172,7 @@ void Vehicle::sendingMessage(core::octet vehiclePrivateKey, core::octet signatur
  *
  * @throws None
  */
-static bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
+bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
 {
     using namespace Ed25519;
     return EDDSA_SIGNATURE(ph, privateKey, context, message, signature);

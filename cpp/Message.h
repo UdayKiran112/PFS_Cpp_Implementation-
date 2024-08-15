@@ -1,8 +1,11 @@
+#pragma once
+
 #include <bits/stdc++.h>
 #include<chrono>
 #include "Lib/core.h"
 #include "Lib/eddsa_Ed25519.h"
 #include "Lib/config_big_B256_56.h"
+using namespace std;
 
 // using namespace std;
 
