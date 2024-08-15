@@ -213,7 +213,12 @@ static bool Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage,
 
     // Initialize ECP variables
     ECP LHS, RHS, P, Apoint, Bpoint, PubKey, VehPubKey;
+    // Copy values into other points to avoid issues with pointers
     ECP_copy(&P, GeneratorPoint);
+    ECP_copy(&PubKey, PublicKey);
+    ECP_copy(&VehPubKey, VehiclePublicKey);
+    ECP_copy(&Apoint, A);
+    ECP_copy(&Bpoint, B);
 
     // Compute LHS
     BIG signedMessageHash;

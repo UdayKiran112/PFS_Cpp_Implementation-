@@ -1,3 +1,6 @@
+#ifndef KEY_H // Check if KEY_H is not defined
+#define KEY_H // Define KEY_H
+
 #include"Lib/arch.h"
 #include"Lib/core.h"
 #include"Lib/randapi.h"
@@ -21,3 +24,5 @@ class Key{
         static int generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *generatorPoint);
         static int generatePrivateKey(csprng *randomNumberGenerator, octet *PrivateKey);
 };
+
+#endif // End of KEY_H

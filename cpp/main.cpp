@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include "Lib/core.h"
 #include "Vehicle.h"
+#include "Message.h"
 #include"Key.h"
 using namespace std;
 
@@ -45,7 +46,7 @@ int main(){
     Key::generatePublicKey(&priB, &puB, &generator);
     
     //hash need to be generated
-    octet hash = {0, msg.size() * sizeof(char), StrtoCharstar(msg)};
+    octet hash = {0, static_cast<int>((msg).size() * sizeof(char)), StrtoCharstar(msg)};
     octet Hashed;
     Message::Hash_Function(&hash, &Hashed, 0);
     message = Message(msg, TS, puB, hash);

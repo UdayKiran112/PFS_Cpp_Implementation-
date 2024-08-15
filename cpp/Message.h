@@ -1,10 +1,14 @@
-#include <bits/stdc++.h>
-#include<chrono>
+#ifndef MESSAGE_H
+#define MESSAGE_H
+
+#include <string>
+#include <chrono>
 #include "Lib/core.h"
 #include "Lib/eddsa_Ed25519.h"
 #include "Lib/config_big_B256_56.h"
 
 // using namespace std;
+using namespace std;
 
 class Message{
     private:
@@ -25,7 +29,9 @@ class Message{
         void setHashMsg(core::octet hashMsg);
 
         static void Concatenate_octet(octet *data1, octet *data2, octet *result);
-        static void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result);
+        // static void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result);
         static void Hash_Function(octet *input, octet *output, int pad);
         static void timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result);
 };
+
+#endif // MESSAGE_H
