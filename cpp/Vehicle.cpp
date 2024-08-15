@@ -4,7 +4,7 @@
 #include "Message.h"
 using namespace std;
 
-Vehicle::Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA ta)
+Vehicle::Vehicle(octet registrationId, Key vehicleKey, octet signatureKey, octet A, TA ta)
 {
     this->registrationId = registrationId;
     this->vehicleKey = vehicleKey;
@@ -13,7 +13,13 @@ Vehicle::Vehicle(int registrationId, Key vehicleKey, int signatureKey, int A, TA
     this->ta = ta;
 }
 
-int Vehicle::getRegistrationId()
+Vehicle::Vehicle(){}
+
+Vehicle::Vehicle(csprng *RNG){
+    //only ta should be initilized with TA constructor
+    this->ta = TA(RNG);
+}
+octet Vehicle::getRegistrationId()
 {
     return registrationId;
 }
@@ -23,12 +29,12 @@ Key Vehicle::getVehicleKey()
     return vehicleKey;
 }
 
-int Vehicle::getSignatureKey()
+octet Vehicle::getSignatureKey()
 {
     return signatureKey;
 }
 
-int Vehicle::getA()
+octet Vehicle::getA()
 {
     return A;
 }
@@ -38,7 +44,7 @@ TA Vehicle::getTA()
     return ta;
 }
 
-void Vehicle::setRegistrationId(int registrationId)
+void Vehicle::setRegistrationId(octet registrationId)
 {
     this->registrationId = registrationId;
 }
@@ -48,12 +54,12 @@ void Vehicle::setVehicleKey(Key vehicleKey)
     this->vehicleKey = vehicleKey;
 }
 
-void Vehicle::setSignatureKey(int signatureKey)
+void Vehicle::setSignatureKey(octet signatureKey)
 {
     this->signatureKey = signatureKey;
 }
 
-void Vehicle::setA(int A)
+void Vehicle::setA(octet A)
 {
     this->A = A;
 }
@@ -63,31 +69,14 @@ void Vehicle::setTA(TA ta)
     this->ta = ta;
 }
 
-int Vehicle::generateSignatureKey(int randomGenerator)
-{
-    return 0;
-}
-
-int Vehicle::generateA(int randomGenerator)
-{
-    return 0;
-}
-
-int Vehicle::generateRegistrationId(int randomGenerator)
-{
-    return 0;
-}
-
-Key Vehicle::generateVehicleKey(int randomGenerator)
-{
-    return Key();
-}
-
 using namespace core;
 using namespace Ed25519;
 void Vehicle::requestVerification()
 {
-    // TODO
+    octet signkey, virpubkey;
+    this->ta.validateRequest(&(this->registrationId), &(this->getVehicleKey().getPublicKey()), &signkey, &virpubkey);
+    this->setSignatureKey(signkey);
+    this->setA(virpubkey);
 }
 
 static char *StrtoCharstar(string s)
@@ -97,7 +86,7 @@ static char *StrtoCharstar(string s)
     return c;
 }
 
-void Vehicle::sendingMessage(int vehiclePrivateKey, int signatureKey, Message message) {
+void Vehicle::sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message){
     char q[EFS_Ed25519], sig[2 * EFS_Ed25519];
     string s = message.getMessage();
 

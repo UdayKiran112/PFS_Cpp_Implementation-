@@ -1,26 +1,38 @@
 #include <bits/stdc++.h>
 #include "Key.h"
 using namespace std;
-Key::Key()
+
+Key::Key(){}
+Key::Key(csprng *RNG)
 {
+    octet priv;
+    generatePrivateKey(RNG, &priv);
+    this->setPrivateKey(priv);
+
+    octet pub;
+    Ed25519::ECP G;
+    PointGeneration(&G);
+    generatePublicKey(&priv, &pub, &G);
+    this->setPublicKey(pub);
 }
-Key::Key(octet privateKey){
-    this->privateKey = privateKey;
-}
-octet Key::getPrivateKey(){
+octet Key::getPrivateKey()
+{
     return privateKey;
 }
-octet Key::getPublicKey(){
+octet Key::getPublicKey()
+{
     return publicKey;
 }
-void Key::setPrivateKey(octet privateKey){
+void Key::setPrivateKey(octet privateKey)
+{
     this->privateKey = privateKey;
 }
-void Key::setPublicKey(octet publicKey){
+void Key::setPublicKey(octet publicKey)
+{
     this->publicKey = publicKey;
 }
 
-void Key::PointGeneration(Ed25519::ECP G)
+void Key::PointGeneration(Ed25519::ECP *G)
 {
     using namespace Ed25519;
 
@@ -33,9 +45,9 @@ void Key::PointGeneration(Ed25519::ECP G)
     }
     else
     {
-        ECP_copy(&G, &P);
+        ECP_copy(G, &P);
         cout << "Point generated" << endl;
-        ECP_output(&G);
+        ECP_output(G);
     }
 }
 
@@ -90,7 +102,7 @@ int Key::generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *ge
     ECP_toOctet(publicKey, generatorPoint, false);
 
     // Validating Public Key
-    int res = Ed25519::ECP_PUBLIC_KEY_VALIDATE(publicKey);
+    res = Ed25519::ECP_PUBLIC_KEY_VALIDATE(publicKey);
     if (res != 0)
     {
         cout << " ECP Public Key Validation Failed " << endl;

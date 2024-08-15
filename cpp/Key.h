@@ -1,3 +1,5 @@
+#pragma once
+
 #include"Lib/arch.h"
 #include"Lib/core.h"
 #include"Lib/randapi.h"
@@ -8,16 +10,17 @@
 class Key{
     private:
         octet privateKey;
-        octet publicKey; // will change
+        octet publicKey;
     public:
+        Key(csprng *RNG);
+        // Key(octet privateKey);
         Key();
-        Key(octet privateKey);
         octet getPrivateKey();
         octet getPublicKey();
         void setPrivateKey(octet privateKey);
         void setPublicKey(octet publicKey);
 
-        static void PointGeneration(Ed25519::ECP G);
+        static void PointGeneration(Ed25519::ECP *G);
         static int generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *generatorPoint);
         static int generatePrivateKey(csprng *randomNumberGenerator, octet *PrivateKey);
 };

@@ -99,6 +99,21 @@ void Message::concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet
     cout << "Concatenated" << endl;
 }
 
+void Message::add_octets(octet *data1, octet *data2, octet *result){
+    //convert data in data1 and data2 to BIG
+    BIG point1, point2;
+    BIG_fromBytes(point1, data1->val);
+    BIG_fromBytes(point2, data2->val);
+    //add the two BIGs
+    BIG sum;
+    BIG_add(sum, point1, point2);
+    //convert the sum to octet
+    result->len = 32;
+    result->max = 32;
+    result->val = new char[32];
+    BIG_toBytes(result->val, sum);
+}
+
 
 void Message::timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result)
 {

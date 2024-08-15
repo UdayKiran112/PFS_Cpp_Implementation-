@@ -1,5 +1,6 @@
 #include<bits/stdc++.h>
 #include "Key.h"
+#include "Message.h"
 using namespace std;
 class TA{
     private:
@@ -8,7 +9,8 @@ class TA{
     
     public:
         TA();
-        void validateRequest(octet registrationId, octet vehiclePublicKey, octet SignatureKey, octet A);
+        TA(csprng *RNG);
+        void validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
         void setGroupKey(Key groupKey);
         Key getGroupKey();
         vector<pair<octet, octet>> getDictionary();
