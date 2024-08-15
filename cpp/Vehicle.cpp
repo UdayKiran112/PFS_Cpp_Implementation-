@@ -111,7 +111,7 @@ void Vehicle::sendingMessage(core::octet vehiclePrivateKey, core::octet signatur
     octet SIG = {sizeof(sig), sizeof(sig), sig};
 
     // Sign the message
-    bool x = signMessage(false, &D, NULL, &M, &SIG);
+    bool x = signMessage(false, &D, nullptr, &M, &SIG);
     if(!x) {
         cout << "No Signature Generated";
         delete[] msg; // Clean up memory if necessary
@@ -199,7 +199,7 @@ static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *mess
 
 #define T_replay 1000 // Define T_replay with an appropriate value
 
-static bool Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message)
+bool Vehicle::Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message)
 {
     using namespace B256_56;
     auto now = chrono::system_clock::now();

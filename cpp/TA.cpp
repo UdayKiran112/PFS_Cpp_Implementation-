@@ -2,6 +2,8 @@
 #include "TA.h"
 using namespace std;
 
+static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
+
 TA::TA() {}
 
 TA::TA(csprng *RNG)
