@@ -85,19 +85,19 @@ void Message::Concatenate_octet(octet *data1, octet *data2, octet *result)
     memcpy(result->val + data1->len, data2->val, data2->len);
 }
 
-// Concatenate two BIG numbers
-void Message::concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result)
-{
-    using namespace B256_56;
-    octet p1, p2;
-    p1.len = NLEN_B256_56;
-    p2.len = NLEN_B256_56;
+// // Concatenate two BIG numbers
+// void Message::concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result)
+// {
+//     using namespace B256_56;
+//     octet p1, p2;
+//     p1.len = NLEN_B256_56;
+//     p2.len = NLEN_B256_56;
 
-    BIG_toBytes(p1.val, point1);
-    BIG_toBytes(p2.val, point2);
-    Concatenate_octet(&p1, &p2, result);
-    cout << "Concatenated" << endl;
-}
+//     BIG_toBytes(p1.val, point1);
+//     BIG_toBytes(p2.val, point2);
+//     Concatenate_octet(&p1, &p2, result);
+//     cout << "Concatenated" << endl;
+// }
 
 void Message::add_octets(octet *data1, octet *data2, octet *result){
     //convert data in data1 and data2 to BIG

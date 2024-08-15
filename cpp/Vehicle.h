@@ -39,5 +39,12 @@ public:
 
     void sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message);
 
-    void validateMessage(Message message, octet signatureKey, octet A, octet senderPublicKey);
+
+        static bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature);
+
+        static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature);
+
+        static bool Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message);
+        
+        void validateMessage(Message message, octet signatureKey, octet A, octet senderPublicKey);
 };

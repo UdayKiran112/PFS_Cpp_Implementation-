@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include "Lib/core.h"
 #include "Vehicle.h"
+#include "Message.h"
 using namespace std;
 
 // using namespace core;
