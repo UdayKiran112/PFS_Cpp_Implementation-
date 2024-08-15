@@ -34,3 +34,5 @@ class Message{
         static void timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result);
         static void add_octets(octet *data1, octet *data2, octet *result);
 };
+
+#endif // MESSAGE_H
