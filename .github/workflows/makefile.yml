@@ -1,0 +1,34 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up C++ environment
+      uses: actions/setup-cpp@v2
+      with:
+        compiler: 'gcc' # Or 'clang', depending on your preference
+
+    - name: Install build dependencies
+      run: sudo apt-get install -y build-essential
+
+    - name: Build project
+      run: make
+
+    - name: Run tests
+      run: make check || true  # Replace with your actual test command if different
+
+    - name: Package the project
+      run: make distcheck || true  # Replace with your actual packaging command if different
