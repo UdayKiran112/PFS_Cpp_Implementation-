@@ -3,21 +3,37 @@
 using namespace std;
 
 Message::Message(){
-    
+
 }
 
-Message::Message(string message, chrono::system_clock::time_point Timestamp, core::octet B, core::octet hashMsg){
-    this->message = message;
-    this->Timestamp = Timestamp;
+Message::~Message() {
+    delete[] message.val;
+    delete[] Timestamp.val;
+    delete[] B.val;
+    delete[] hashMsg.val;
+}
+
+Message::Message(string message, chrono::system_clock::time_point Timestamp, core::octet B){
+    this->message.len = message.size();
+    this->message.max = message.size();
+    this->message.val = new char[message.size()];
+    memcpy(this->message.val, message.c_str(), message.size());
+
+    timestamp_to_octet(Timestamp, &this->Timestamp);
+
     this->B = B;
-    this->hashMsg = hashMsg;
+
+    octet temp1, temp2;
+    Concatenate_octet(&this->message, &this->Timestamp, &temp1);
+    Concatenate_octet(&temp1, &this->B, &temp2);
+    Hash_Function(&temp2, &hashMsg, 0);
 }
 
-string Message::getMessage(){
+core::octet Message::getMessage(){
     return message;
 }
 
-chrono::system_clock::time_point Message::getTimestamp(){
+core::octet Message::getTimestamp(){
     return Timestamp;
 }
 
@@ -29,11 +45,11 @@ core::octet Message::getHashMsg(){
     return hashMsg;
 }
 
-void Message::setMessage(string message){
+void Message::setMessage(core::octet message){
     this->message = message;
 }
 
-void Message::setTimestamp(chrono::system_clock::time_point Timestamp){
+void Message::setTimestamp(core::octet Timestamp){
     this->Timestamp = Timestamp;
 }
 
@@ -51,32 +67,20 @@ using namespace B256_56;
 using namespace F25519;
 
 void Message::Hash_Function(octet *input, octet *output, int pad){
-    
-    /* The 'n' argument is unused in this function. It is likely that it was included as a placeholder for a future
-       modification that would involve a third parameter. The 'n' value is not used in any of the cases of the switch
-       statement. The 'n' value is instead used in the default case, which is an empty case and therefore does not
-       have any effect on the function.
-
-       Therefore, the 'n' argument can be safely removed from the function signature without affecting the behavior
-       of the code. */
     int n = -1;
     GPhash(SHA256, 32, output, 32, pad, input, n, nullptr);
 
-    // Map octet hash to Zp*
     BIG x, prime;
-    BIG_fromBytes(x, output->val); // Convert hash bytes to BIG number
-    BIG_zero(prime);               // Initialize BIG 'prime' to zero
-    BIG_rcopy(prime, Modulus);     // Copy the constant Modulus value to 'prime'
-    BIG_mod(x, prime);             // Take x mod prime
+    BIG_fromBytes(x, output->val);
+    BIG_zero(prime);
+    BIG_rcopy(prime, Modulus);
+    BIG_mod(x, prime);
     output->len = 32;
     output->max = 32;
     output->val = new char[32];
-    BIG_toBytes(output->val, x);   // Convert the BIG number back to bytes
-    
-    cout << "Hashed" << endl;
+    BIG_toBytes(output->val, x);
 }
 
-/* Concatenate two octet strings */
 void Message::Concatenate_octet(octet *data1, octet *data2, octet *result)
 {
     int total_length = data1->len + data2->len;
@@ -85,35 +89,17 @@ void Message::Concatenate_octet(octet *data1, octet *data2, octet *result)
     memcpy(result->val + data1->len, data2->val, data2->len);
 }
 
-// // Concatenate two BIG numbers
-// void Message::concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result)
-// {
-//     using namespace B256_56;
-//     octet p1, p2;
-//     p1.len = NLEN_B256_56;
-//     p2.len = NLEN_B256_56;
-
-//     BIG_toBytes(p1.val, point1);
-//     BIG_toBytes(p2.val, point2);
-//     Concatenate_octet(&p1, &p2, result);
-//     cout << "Concatenated" << endl;
-// }
-
 void Message::add_octets(octet *data1, octet *data2, octet *result){
-    //convert data in data1 and data2 to BIG
     BIG point1, point2;
     BIG_fromBytes(point1, data1->val);
     BIG_fromBytes(point2, data2->val);
-    //add the two BIGs
     BIG sum;
     BIG_add(sum, point1, point2);
-    //convert the sum to octet
     result->len = 32;
     result->max = 32;
     result->val = new char[32];
     BIG_toBytes(result->val, sum);
 }
-
 
 void Message::timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result)
 {

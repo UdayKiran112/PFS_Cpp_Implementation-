@@ -13,6 +13,10 @@ char *StrtoCharstar(string s)
     return c;
 }
 
+void sendAndValidate(){
+
+}
+
 int main(){
 
     unsigned long ran;
@@ -28,26 +32,20 @@ int main(){
     for (int i = 4; i < 100; i++) RAW.val[i] = i;
     CREATE_CSPRNG(&RNG, &RAW);
 
-    octet privateKey;
+    // octet privateKey;
     Ed25519::ECP generator;
     Key::PointGeneration(&generator);
 
     Vehicle vehicle = Vehicle(&RNG);
 
-    // string msg = "Mugiwara"; //
-    // chrono::system_clock::time_point TS = chrono::system_clock::now(); //
-    // octet puB; //
-    // octet priB;
-    // flag = Key::generatePrivateKey(&RNG, &priB);
-    // Key::generatePublicKey(&priB, &puB, &generator);
+    // Message message;
+    string msg = "Mugiwara";
+    chrono::system_clock::time_point TS = chrono::system_clock::now();
+    Key Bkey(&RNG);
+    octet b = Bkey.getPrivateKey();
+    octet B = Bkey.getPublicKey();
+
+    Message message(msg, TS, B);
     
-    // //hash need to be generated
-    // octet hash = {0, static_cast<int>(msg.size() * sizeof(char)), StrtoCharstar(msg)};
-    // octet Hashed;
-    // Message::Hash_Function(&hash, &Hashed, 0);
-    // message = Message(msg, TS, puB, hash);
-
-    // vehicle.sendingMessage(0, 0, message); //TODO
-
 
 }

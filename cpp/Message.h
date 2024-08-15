@@ -1,7 +1,6 @@
 #pragma once
 
 #include <bits/stdc++.h>
-#include<chrono>
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
@@ -17,24 +16,24 @@ using namespace std;
 
 class Message{
     private:
-        string message;
-        chrono::system_clock::time_point Timestamp;
+        core::octet message;
+        core::octet Timestamp;
         core::octet B; // Public Key Type
         core::octet hashMsg; //64 bitss less than multiple of 512 bits
     public:
         Message();
-        Message(string message, chrono::system_clock::time_point Timestamp, core::octet B, core::octet hashMsg);
-        string getMessage();
-        chrono::system_clock::time_point getTimestamp();
+        ~Message();
+        Message(string message, chrono::system_clock::time_point Timestamp, core::octet B);
+        core::octet getMessage();
+        core::octet getTimestamp();
         core::octet getB();
         core::octet getHashMsg();
-        void setMessage(string message);
-        void setTimestamp(chrono::system_clock::time_point Timestamp);
+        void setMessage(core::octet message);
+        void setTimestamp(core::octet Timestamp);
         void setB(core::octet B);
         void setHashMsg(core::octet hashMsg);
 
         static void Concatenate_octet(octet *data1, octet *data2, octet *result);
-        // static void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result);
         static void Hash_Function(octet *input, octet *output, int pad);
         static void timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result);
         static void add_octets(octet *data1, octet *data2, octet *result);
