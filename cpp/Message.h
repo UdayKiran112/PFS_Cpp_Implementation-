@@ -32,6 +32,5 @@ class Message{
         // static void concatenate_values(B256_56::BIG point1, B256_56::BIG point2, octet *result);
         static void Hash_Function(octet *input, octet *output, int pad);
         static void timestamp_to_octet(chrono::system_clock::time_point timeStamp, octet* result);
+        static void add_octets(octet *data1, octet *data2, octet *result);
 };
-
-#endif // MESSAGE_H
