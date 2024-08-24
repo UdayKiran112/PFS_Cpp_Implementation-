@@ -12,7 +12,7 @@ class TA{
     public:
         TA();
         TA(csprng *RNG);
-        void validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
+        void validateRequest(csprng* RNG, octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
         void setGroupKey(Key groupKey);
         Key getGroupKey();
         vector<pair<octet, octet>> getDictionary();

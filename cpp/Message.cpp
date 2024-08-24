@@ -116,3 +116,15 @@ void Message::timestamp_to_octet(chrono::system_clock::time_point timeStamp, oct
         millis >>= 8;
     }
 }
+
+void Message::multiply_octet(octet *data1, octet *data2, octet *result){
+    BIG point1, point2;
+    BIG_fromBytes(point1, data1->val);
+    BIG_fromBytes(point2, data2->val);
+    BIG product;
+    BIG_mul(product, point1, point2);
+    result->len = 32;
+    result->max = 32;
+    result->val = new char[32];
+    BIG_toBytes(result->val, product);
+}

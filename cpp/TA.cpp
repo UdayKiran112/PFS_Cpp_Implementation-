@@ -13,7 +13,7 @@ TA::TA(csprng *RNG)
     this->groupKey = Key(RNG);
 }
 
-void TA::validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
+void TA::validateRequest(csprng* RNG, octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
     auto regValid = checkRegValid(registrationId);
     if (!regValid)
@@ -27,7 +27,7 @@ void TA::validateRequest(octet *registrationId, octet *vehiclePublicKey, octet *
     this->setDictionary(dict);
     // generate signatureKey and A
     auto temp = this->getGroupKey().getPrivateKey();
-    bool sigGen = signatureGeneration(&temp, vehiclePublicKey, SignatureKey, A);
+    bool sigGen = signatureGeneration(RNG, &temp, vehiclePublicKey, SignatureKey, A);
 }
 
 void TA::setGroupKey(Key groupKey)
@@ -57,26 +57,10 @@ bool checkRegValid(octet *registrationId)
     return true;
 }
 
-static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
+static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
-    unsigned long ran;
-    char raw[100];
-    octet RAW = {0, sizeof(raw), raw};
-    csprng RNG;
-
-    // Seed RNG
-    time((time_t *)&ran);
-    RAW.len = 100;
-    RAW.val[0] = ran;
-    RAW.val[1] = ran >> 8;
-    RAW.val[2] = ran >> 16;
-    RAW.val[3] = ran >> 24;
-    for (int i = 4; i < 100; i++)
-        RAW.val[i] = i; // Consider using more randomness here
-    CREATE_CSPRNG(&RNG, &RAW);
-
     // Generate a random key
-    Key randomKey(&RNG);
+    Key randomKey(RNG);
 
     // Ensure 'result' is properly initialized to handle the concatenation
     octet result;
@@ -85,17 +69,32 @@ static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey,
     result.val = new char[result.max];
 
     // Concatenate vehicle public key and random private key
-    auto temp = randomKey.getPrivateKey();
-    Message::Concatenate_octet(vehiclePublicKey, &temp, &result);
+    auto publicKey = randomKey.getPublicKey();
+    Message::Concatenate_octet(vehiclePublicKey, &publicKey, &result);
 
-    // Hash the concatenated result into SignatureKey
-    Message::Hash_Function(&result, SignatureKey, 0);
+    // Hash the concatenated result into a temporary hash result
+    octet hashResult;
+    hashResult.len = 0;
+    hashResult.max = 32; // Replace with the actual hash size
+    hashResult.val = new char[hashResult.max];
+    Message::Hash_Function(&result, &hashResult, 0);
 
-    // Add the group private key to the hashed result
-    Message::add_octets(groupPrivateKey, &result, SignatureKey);
+    // Multiply the random private key by the hash result
+    auto privateKey = randomKey.getPrivateKey();
+    octet product;
+    product.len = 0;
+    product.max = privateKey.len;  // Assuming result fits into the size of the private key
+    product.val = new char[product.max];
+    Message::multiply_octet(&privateKey, &hashResult, &product);
+
+    // Add the group private key to the multiplication result
+    Message::add_octets(groupPrivateKey, &product, SignatureKey);
 
     // Clean up
     delete[] result.val;
+    delete[] hashResult.val;
+    delete[] product.val;
 
     return true;
 }
+    
