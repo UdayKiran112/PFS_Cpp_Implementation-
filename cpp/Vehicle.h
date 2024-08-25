@@ -40,7 +40,7 @@ public:
     // static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature);
     bool signMessage(csprng *RNG, string message, octet *B, Message msg);
 
-    bool Validate_Message(Ed25519::ECP *GeneratorPoint, octet *signedMessage, Ed25519::ECP *PublicKey, Ed25519::ECP *VehiclePublicKey, Ed25519::ECP *B, Ed25519::ECP *A, chrono::system_clock::time_point timeStamp, octet *Message);
+    bool Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signatureKey,core::octet *VehiclePublicKey, core::octet *A,Message msg);
 
     // void validateMessage(Message message, octet signatureKey, octet A, octet senderPublicKey);
 };

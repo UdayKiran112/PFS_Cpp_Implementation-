@@ -143,53 +143,82 @@ static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *mess
 
 #define T_replay 1000
 
-bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, octet *signedMessage, Ed25519::ECP *PublicKey, Ed25519::ECP *VehiclePublicKey, Ed25519::ECP *B, Ed25519::ECP *A, chrono::system_clock::time_point timeStamp, octet *Message)
+bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signatureKey,core::octet *VehiclePublicKey, core::octet *A,Message msg)
 {
     using namespace B256_56;
-    auto now = chrono::system_clock::now();
-    if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay)
+
+    // Retrieve the timestamp from the message as a 4-byte octet
+    core::octet timestamp_oct = msg.getTimestamp();
+    
+    // Convert 4-byte octet to a 32-bit integer (milliseconds)
+    uint32_t millis = 0;
+    unsigned char* ptr = (unsigned char*)timestamp_oct.val;
+    for (int i = 0; i < 4; i++)
     {
-        return false;
+        millis <<= 8;
+        millis |= ptr[i];
+    }
+    
+    // Convert milliseconds since epoch to chrono::system_clock::time_point
+    chrono::system_clock::time_point receivedTimestamp = chrono::system_clock::time_point(chrono::milliseconds(millis));
+    
+    auto now = chrono::system_clock::now();
+    
+    // Check for replay attack by comparing timestamps
+    if (chrono::duration_cast<chrono::milliseconds>(now - receivedTimestamp).count() > T_replay)
+    {
+        cout << "Replay attack detected!" << endl;
+        return false; // The message is too old, possible replay attack
     }
 
-    ECP LHS, RHS, P, Apoint, Bpoint, PubKey, VehPubKey;
-    ECP_copy(&P, GeneratorPoint);
-    ECP_copy(&PubKey, PublicKey);
-    ECP_copy(&VehPubKey, VehiclePublicKey);
-    ECP_copy(&Apoint, A);
-    ECP_copy(&Bpoint, B);
+    ECP LHS, RHS, P, Apoint, Bpoint, SigKey, VehPubKey;
+
+    // Convert octet to ECP
+    ECP_fromOctet(&SigKey, signatureKey);
+    ECP_fromOctet(&VehPubKey, VehiclePublicKey);
+    ECP_fromOctet(&Apoint, A);
+    ECP_fromOctet(&Bpoint, &msg.getB());
+
+    // generate new variables to ensure original parameters are not changed
+    
+    ECP_copy(&P, GeneratorPoint); // P = Generator
+
+    // Compute LHS = σ(M) * P 
 
     BIG signedMessageHash;
-    BIG_fromBytes(signedMessageHash, signedMessage->val);
-    ECP_mul(&P, signedMessageHash);
-    ECP_copy(&LHS, &P);
+    BIG_fromBytes(signedMessageHash, msg.getFinalMsg().val);
+    ECP_mul(&P, signedMessageHash); // P = σ(M) * P 
+    ECP_copy(&LHS, &P); // LHS =  P
 
-    ECP_copy(&RHS, PublicKey);
-    ECP_add(&RHS, VehiclePublicKey);
+    // Compute RHS = GK + H(PKi || A) * A + PKi + H(M || T || B) * B
 
-    ECP_add(VehiclePublicKey, A);
-    octet A_hash_octet;
-    ECP_toOctet(&A_hash_octet, VehiclePublicKey, true);
-    octet Hash_A_out;
-    Message::Hash_Function(&A_hash_octet, &Hash_A_out, 0);
+    ECP_copy(&RHS, &SigKey); // RHS = GK
+    ECP_add(&RHS, &VehPubKey); // RHS = GK + PKi
+
+    octet* r1;
+    Message::Concatenate_octet(VehiclePublicKey,A,r1); // r1 = PKi || A --> Octet concatenation
+
+    octet* r2,*temp;
+    Message::Concatenate_octet(&msg.getMessage(),&msg.getTimestamp(),temp); // temp = M || T ||--> Octet concatenation
+    Message::Concatenate_octet(temp,&msg.getB(),r2); // r2 = M || T || B --> Octet concatenation
+
+    octet *Hash_A,*Hash_B;
+    Message:: Hash_Function(r1, Hash_A, 0); // Hash_A = H(PKi || A)
+    Message:: Hash_Function(r2, Hash_B, 0); // Hash_B = H(M || T || B)
+
+    // Convert Octet to BIG for Point multiplication
     BIG A_hash;
-    BIG_fromBytes(A_hash, A_hash_octet.val);
-    ECP_mul(A, A_hash);
-
-    ECP_copy(&Bpoint, B);
-    octet result, B_octet, B_hash_octet;
-    ECP_toOctet(&B_octet, &Bpoint, true);
-    Message::Concatenate_octet(Message, &B_octet, &result);
-    octet timestamp_oct;
-    Message::timestamp_to_octet(timeStamp, &timestamp_oct);
-    Message::Concatenate_octet(&result, &timestamp_oct, &result);
-    Message::Hash_Function(&result, &B_hash_octet, 0);
+    BIG_fromBytes(A_hash, Hash_A->val);
     BIG B_hash;
-    BIG_fromBytes(B_hash, B_hash_octet.val);
-    ECP_mul(&Bpoint, B_hash);
+    BIG_fromBytes(B_hash, Hash_B->val);
 
-    ECP_add(&RHS, &Bpoint);
-    ECP_add(&RHS, A);
+    ECP_mul(&Apoint, A_hash); // Apoint = H(PKi || A) * A
+    ECP_mul(&Bpoint, B_hash); // Bpoint = H(M || T || B) * B
+
+    ECP_add(&RHS, &Apoint); // RHS = GK + H(PKi || A) * A
+    ECP_add(&RHS, &Bpoint); // RHS = GK + H(PKi || A) * A + H(M || T || B) * B
+
+    // Compare LHS and RHS
 
     if (!ECP_equals(&LHS, &RHS))
     {

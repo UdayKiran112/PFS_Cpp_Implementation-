@@ -101,14 +101,20 @@ void Message::timestamp_to_octet(chrono::system_clock::time_point timeStamp, oct
     using namespace chrono;
     auto time_since_epoch = timeStamp.time_since_epoch();
     auto millis = duration_cast<milliseconds>(time_since_epoch).count();
-    result->len = 8;
-    result->max = 8;
-    result->val = new char[8];
+
+    // Truncate to 32 bits (4 bytes)
+    uint32_t truncated_millis = static_cast<uint32_t>(millis);
+
+    result->len = 4;
+    result->max = 4;
+    result->val = new char[4];
     unsigned char* ptr = (unsigned char*)result->val;
-    for (int i = 7; i >= 0; i--)
+
+    // Store the 32-bit (4-byte) truncated value into the octet
+    for (int i = 3; i >= 0; i--)
     {
-        ptr[i] = millis & 0xFF;
-        millis >>= 8;
+        ptr[i] = truncated_millis & 0xFF;
+        truncated_millis >>= 8;
     }
 }
 
