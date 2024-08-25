@@ -19,7 +19,8 @@ class Message{
         core::octet message;
         core::octet Timestamp;
         core::octet B; // Public Key Type
-        core::octet hashMsg; //64 bitss less than multiple of 512 bits
+        // core::octet hashMsg; //64 bitss less than multiple of 512 bits
+        core::octet finalMsg;
     public:
         Message();
         ~Message();
@@ -27,11 +28,13 @@ class Message{
         core::octet getMessage();
         core::octet getTimestamp();
         core::octet getB();
-        core::octet getHashMsg();
+        // core::octet getHashMsg();
+        core::octet getFinalMsg();
         void setMessage(core::octet message);
         void setTimestamp(core::octet Timestamp);
         void setB(core::octet B);
-        void setHashMsg(core::octet hashMsg);
+        // void setHashMsg(core::octet hashMsg);
+        void setFinalMsg(core::octet finalMsg);
 
         static void Concatenate_octet(octet *data1, octet *data2, octet *result);
         static void Hash_Function(octet *input, octet *output, int pad);

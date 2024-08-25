@@ -10,7 +10,7 @@ Message::~Message() {
     delete[] message.val;
     delete[] Timestamp.val;
     delete[] B.val;
-    delete[] hashMsg.val;
+    delete[] finalMsg.val;
 }
 
 Message::Message(string message, chrono::system_clock::time_point Timestamp, core::octet B){
@@ -22,11 +22,6 @@ Message::Message(string message, chrono::system_clock::time_point Timestamp, cor
     timestamp_to_octet(Timestamp, &this->Timestamp);
 
     this->B = B;
-
-    octet temp1, temp2;
-    Concatenate_octet(&this->message, &this->Timestamp, &temp1);
-    Concatenate_octet(&temp1, &this->B, &temp2);
-    Hash_Function(&temp2, &hashMsg, 0);
 }
 
 core::octet Message::getMessage(){
@@ -41,8 +36,8 @@ core::octet Message::getB(){
     return B;
 }
 
-core::octet Message::getHashMsg(){
-    return hashMsg;
+core::octet Message::getFinalMsg(){
+    return finalMsg;
 }
 
 void Message::setMessage(core::octet message){
@@ -57,8 +52,8 @@ void Message::setB(core::octet B){
     this->B = B;
 }
 
-void Message::setHashMsg(core::octet hashMsg){
-    this->hashMsg = hashMsg;
+void Message::setFinalMsg(core::octet finalMsg){
+    this->finalMsg = finalMsg;
 }
 
 using namespace core;

@@ -40,14 +40,11 @@ int main()
 
     Vehicle vehicle = Vehicle(&RNG);
 
-    // vehicle.requestVerification(&RNG);
+    vehicle.requestVerification(&RNG);
 
-    // Message message;
-    string msg = "Mugiwara";
-    chrono::system_clock::time_point TS = chrono::system_clock::now();
-    Key Bkey(&RNG);
-    octet b = Bkey.getPrivateKey();
-    octet B = Bkey.getPublicKey();
-
-    Message message(msg, TS, B);
+    Message msg;
+    octet B;
+    string message = "Mugiwara";
+    vehicle.signMessage(&RNG, message, &B, msg);
+    
 }

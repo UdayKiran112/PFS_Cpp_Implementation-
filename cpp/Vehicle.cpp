@@ -104,22 +104,34 @@ static char *StrtoCharstar(string s)
 //     OCT_output(&SIG);
 // }
 
-bool Vehicle::signMessage(csprng *RNG, octet *privateKey, octet *SignatureKey, string message, octet *signedMessage, octet *B, Message msg)
+bool Vehicle::signMessage(csprng *RNG, string message, octet *B, Message msg)
 {
     using namespace Ed25519;
     Key randKey(RNG);
+    octet signedMessage;
+    octet privateKey = this->vehicleKey.getPrivateKey();
+    octet signatureKey = this->signatureKey;
 
     // Generate B
     OCT_copy(B, &randKey.getPublicKey());
     msg = Message(message, chrono::system_clock::now(), *B);
 
+    octet hashMsg;
+
+    octet temp1, temp2;
+    Message::Concatenate_octet(&msg.getMessage(), &msg.getTimestamp(), &temp1);
+    Message::Concatenate_octet(&temp1, &msg.getB(), &temp2);
+    Message::Hash_Function(&temp2, &hashMsg, 0);
+
     // Generate Signature --> signedMessage = SignatureKey + privateKey + randKey.getPrivateKey() * H(M || T || B)
     octet *result;
-    Message::add_octets(privateKey, SignatureKey, result); // signature Key + private Key
+    Message::add_octets(&privateKey, &signatureKey, result); // signature Key + private Key
     octet *part3;
-    Message::multiply_octet(&randKey.getPrivateKey(), &msg.getHashMsg(), part3); // b* H(M || T || B)
+    Message::multiply_octet(&randKey.getPrivateKey(), &hashMsg, part3); // b* H(M || T || B)
 
-    Message::add_octets(result, part3, signedMessage); // signature Key + private Key + b* H(M || T || B)
+    Message::add_octets(result, part3, &signedMessage); // signature Key + private Key + b* H(M || T || B)
+
+    msg.setFinalMsg(signedMessage);
 
     return true;
 }
