@@ -2,7 +2,7 @@
 #include "TA.h"
 using namespace std;
 
-static bool signatureGeneration(octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
+static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
 bool checkRegValid(octet *registrationId);
 
 TA::TA() {}

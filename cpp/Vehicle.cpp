@@ -113,21 +113,29 @@ bool Vehicle::signMessage(csprng *RNG, string message, octet *B, Message msg)
     octet signatureKey = this->signatureKey;
 
     // Generate B
-    OCT_copy(B, &randKey.getPublicKey());
+    octet randKeyPublicKey = randKey.getPublicKey();
+    OCT_copy(B, &randKeyPublicKey);
+
     msg = Message(message, chrono::system_clock::now(), *B);
 
     octet hashMsg;
 
     octet temp1, temp2;
-    Message::Concatenate_octet(&msg.getMessage(), &msg.getTimestamp(), &temp1);
-    Message::Concatenate_octet(&temp1, &msg.getB(), &temp2);
+    octet msgMessage = msg.getMessage();
+    octet msgTimestamp = msg.getTimestamp();
+    Message::Concatenate_octet(&msgMessage, &msgTimestamp, &temp1);
+
+    octet msgB = msg.getB();
+    Message::Concatenate_octet(&temp1, &msgB, &temp2);
+
     Message::Hash_Function(&temp2, &hashMsg, 0);
 
     // Generate Signature --> signedMessage = SignatureKey + privateKey + randKey.getPrivateKey() * H(M || T || B)
     octet *result;
     Message::add_octets(&privateKey, &signatureKey, result); // signature Key + private Key
     octet *part3;
-    Message::multiply_octet(&randKey.getPrivateKey(), &hashMsg, part3); // b* H(M || T || B)
+    octet randKeyPrivateKey = randKey.getPrivateKey();
+    Message::multiply_octet(&randKeyPrivateKey, &hashMsg, part3); // b* H(M || T || B)
 
     Message::add_octets(result, part3, &signedMessage); // signature Key + private Key + b* H(M || T || B)
 
@@ -177,7 +185,9 @@ bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signat
     ECP_fromOctet(&SigKey, signatureKey);
     ECP_fromOctet(&VehPubKey, VehiclePublicKey);
     ECP_fromOctet(&Apoint, A);
-    ECP_fromOctet(&Bpoint, &msg.getB());
+    octet msgB = msg.getB();
+    ECP_fromOctet(&Bpoint, &msgB);
+
 
     // generate new variables to ensure original parameters are not changed
     
@@ -199,8 +209,11 @@ bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signat
     Message::Concatenate_octet(VehiclePublicKey,A,r1); // r1 = PKi || A --> Octet concatenation
 
     octet* r2,*temp;
-    Message::Concatenate_octet(&msg.getMessage(),&msg.getTimestamp(),temp); // temp = M || T ||--> Octet concatenation
-    Message::Concatenate_octet(temp,&msg.getB(),r2); // r2 = M || T || B --> Octet concatenation
+    octet msgMessage = msg.getMessage();
+    octet msgTimestamp = msg.getTimestamp();
+    Message::Concatenate_octet(&msgMessage, &msgTimestamp, temp); // temp = M || T ||--> Octet concatenation
+    
+    Message::Concatenate_octet(temp, &msgB, r2); // r2 = M || T || B --> Octet concatenation
 
     octet *Hash_A,*Hash_B;
     Message:: Hash_Function(r1, Hash_A, 0); // Hash_A = H(PKi || A)
