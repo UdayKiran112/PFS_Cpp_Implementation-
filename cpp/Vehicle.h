@@ -35,11 +35,12 @@ public:
     void setA(octet A);
     void setTA(TA ta);
 
-    void requestVerification();
+    void requestVerification(csprng *RNG);
 
-    static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature);
+    // static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature);
+    static bool signMessage(csprng *RNG, octet *privateKey, octet *SignatureKey, string message, octet *signedMessage, octet *B, Message msg);
 
-    static bool Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message);
-        
-    void validateMessage(Message message, octet signatureKey, octet A, octet senderPublicKey);
+    static bool Validate_Message(Ed25519::ECP *GeneratorPoint, octet *signedMessage, Ed25519::ECP *PublicKey, Ed25519::ECP *VehiclePublicKey, Ed25519::ECP *B, Ed25519::ECP *A, chrono::system_clock::time_point timeStamp, octet *Message);
+
+    // void validateMessage(Message message, octet signatureKey, octet A, octet senderPublicKey);
 };

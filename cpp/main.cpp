@@ -13,11 +13,12 @@ char *StrtoCharstar(string s)
     return c;
 }
 
-void sendAndValidate(){
-
+void sendAndValidate()
+{
 }
 
-int main(){
+int main()
+{
 
     unsigned long ran;
     char raw[100];
@@ -29,7 +30,8 @@ int main(){
     RAW.val[1] = ran >> 8;
     RAW.val[2] = ran >> 16;
     RAW.val[3] = ran >> 24;
-    for (int i = 4; i < 100; i++) RAW.val[i] = i;
+    for (int i = 4; i < 100; i++)
+        RAW.val[i] = i;
     CREATE_CSPRNG(&RNG, &RAW);
 
     // octet privateKey;
@@ -37,6 +39,8 @@ int main(){
     Key::PointGeneration(&generator);
 
     Vehicle vehicle = Vehicle(&RNG);
+
+    // vehicle.requestVerification(&RNG);
 
     // Message message;
     string msg = "Mugiwara";
@@ -46,6 +50,4 @@ int main(){
     octet B = Bkey.getPublicKey();
 
     Message message(msg, TS, B);
-    
-
 }

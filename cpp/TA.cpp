@@ -62,6 +62,7 @@ static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehi
     // Generate a random key
     Key randomKey(RNG);
 
+    
     // Ensure 'result' is properly initialized to handle the concatenation
     octet result;
     result.len = 0; // Start with an empty octet
@@ -70,6 +71,7 @@ static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehi
 
     // Concatenate vehicle public key and random private key
     auto publicKey = randomKey.getPublicKey();
+    OCT_copy(A,&publicKey);
     Message::Concatenate_octet(vehiclePublicKey, &publicKey, &result);
 
     // Hash the concatenated result into a temporary hash result

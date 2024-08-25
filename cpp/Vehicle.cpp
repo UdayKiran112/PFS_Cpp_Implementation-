@@ -15,9 +15,10 @@ Vehicle::Vehicle(octet registrationId, Key vehicleKey, octet signatureKey, octet
     this->ta = ta;
 }
 
-Vehicle::Vehicle(){}
+Vehicle::Vehicle() {}
 
-Vehicle::Vehicle(csprng *RNG){
+Vehicle::Vehicle(csprng *RNG)
+{
     this->ta = TA(RNG);
 }
 octet Vehicle::getRegistrationId()
@@ -72,15 +73,15 @@ void Vehicle::setTA(TA ta)
 
 using namespace core;
 using namespace Ed25519;
-void Vehicle::requestVerification() {
+void Vehicle::requestVerification(csprng *RNG)
+{
     octet signkey, virpubkey;
     octet publicKey = this->getVehicleKey().getPublicKey();
     auto temp = this->registrationId;
-    this->ta.validateRequest(&temp, &publicKey, &signkey, &virpubkey);
+    this->ta.validateRequest(RNG, &temp, &publicKey, &signkey, &virpubkey);
     this->setSignatureKey(signkey);
     this->setA(virpubkey);
 }
-
 
 static char *StrtoCharstar(string s)
 {
@@ -89,29 +90,38 @@ static char *StrtoCharstar(string s)
     return c;
 }
 
-void sendingMessage(core::octet vehiclePrivateKey, core::octet signatureKey, Message message){
-    char q[EFS_Ed25519], sig[2 * EFS_Ed25519];
+// void sendingMessage(csprng *RNG, core::octet vehiclePrivateKey, core::octet signatureKey, string message, octet *B, Message msg, octet *SIG)
+// {
+//     //
+//     bool x = signMessage(RNG, &vehiclePrivateKey, &signatureKey, message, SIG, B, msg);
+//     if (!x)
+//     {
+//         cout << "No Signature Generated";
+//         return;
+//     }
 
-    octet D = {sizeof(int), sizeof(int), reinterpret_cast<char*>(&vehiclePrivateKey)};
-    octet Q = {sizeof(q), sizeof(q), q};
-    octet M = message.getMessage();
-    octet SIG = {sizeof(sig), sizeof(sig), sig};
+//     cout << "Signature= 0x";
+//     OCT_output(&SIG);
+// }
 
-    bool x = signMessage(false, &D, nullptr, &M, &SIG);
-    if(!x) {
-        cout << "No Signature Generated";
-        return;
-    }
-
-    cout << "Signature= 0x";
-    OCT_output(&SIG);
-
-}
-
-bool signMessage(bool ph, octet *privateKey, octet *context, octet *message, octet *signature)
+bool Vehicle::signMessage(csprng *RNG, octet *privateKey, octet *SignatureKey, string message, octet *signedMessage, octet *B, Message msg)
 {
     using namespace Ed25519;
-    return EDDSA_SIGNATURE(ph, privateKey, context, message, signature);
+    Key randKey(RNG);
+
+    // Generate B
+    OCT_copy(B, &randKey.getPublicKey());
+    msg = Message(message, chrono::system_clock::now(), *B);
+
+    // Generate Signature --> signedMessage = SignatureKey + privateKey + randKey.getPrivateKey() * H(M || T || B)
+    octet *result;
+    Message::add_octets(privateKey, SignatureKey, result); // signature Key + private Key
+    octet *part3;
+    Message::multiply_octet(&randKey.getPrivateKey(), &msg.getHashMsg(), part3); // b* H(M || T || B)
+
+    Message::add_octets(result, part3, signedMessage); // signature Key + private Key + b* H(M || T || B)
+
+    return true;
 }
 
 static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *message, octet *signature)
@@ -121,11 +131,12 @@ static bool verifyMessage(bool ph, octet *publicKey, octet *context, octet *mess
 
 #define T_replay 1000
 
-bool Vehicle::Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessage, Ed25519::ECP* PublicKey, Ed25519::ECP* VehiclePublicKey, Ed25519::ECP* B, Ed25519::ECP* A, chrono::system_clock::time_point timeStamp, octet* Message)
+bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, octet *signedMessage, Ed25519::ECP *PublicKey, Ed25519::ECP *VehiclePublicKey, Ed25519::ECP *B, Ed25519::ECP *A, chrono::system_clock::time_point timeStamp, octet *Message)
 {
     using namespace B256_56;
     auto now = chrono::system_clock::now();
-    if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay) {
+    if (chrono::duration_cast<chrono::milliseconds>(now - timeStamp).count() > T_replay)
+    {
         return false;
     }
 
@@ -168,7 +179,8 @@ bool Vehicle::Validate_Message(Ed25519::ECP* GeneratorPoint, octet* signedMessag
     ECP_add(&RHS, &Bpoint);
     ECP_add(&RHS, A);
 
-    if (!ECP_equals(&LHS, &RHS)) {
+    if (!ECP_equals(&LHS, &RHS))
+    {
         cout << "Message has been Compromised\n";
         return false;
     }
