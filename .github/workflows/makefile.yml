@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Use ubuntu-latest for Linux builds
 
     steps:
     - name: Checkout code
@@ -19,20 +19,27 @@ jobs:
     - name: Set up C++ environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake
+        sudo apt-get install -y build-essential
 
-    - name: Configure CMake
-      run: cmake -S . -B build
+    - name: Create directories
+      run: |
+        mkdir -p cpp/obj cpp/bin
 
     - name: Build project
-      run: cmake --build build
+      run: |
+        make -C cpp all || { echo 'Build failed'; exit 1; }
+
+    - name: List files
+      run: |
+        echo "Listing files in the build directory:"
+        ls -R cpp/bin
 
     - name: Run tests
       run: |
-        cd build
-        make test || true  # Replace with your actual test command if different
+        # Add commands to run tests if applicable
+        # For example: ./cpp/bin/app --test
+        echo "No tests to run"
 
-    - name: Package the project
+    - name: Clean up
       run: |
-        cd build
-        make package || true  # Replace with your actual packaging command if different
+        make -C cpp clean || { echo 'Clean up failed'; exit 1; }
