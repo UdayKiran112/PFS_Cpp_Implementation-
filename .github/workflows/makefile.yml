@@ -19,16 +19,23 @@ jobs:
     - name: Set up C++ environment
       uses: actions/setup-cpp@v2
       with:
-        compiler: 'gcc' # Or 'clang', depending on your preference
+        compiler: 'gcc' # Use 'clang' if you prefer Clang
 
     - name: Install build dependencies
-      run: sudo apt-get install -y build-essential
+      run: sudo apt-get update && sudo apt-get install -y build-essential cmake
+
+    - name: Configure CMake
+      run: cmake -S . -B build
 
     - name: Build project
-      run: make
+      run: cmake --build build
 
     - name: Run tests
-      run: make check || true  # Replace with your actual test command if different
+      run: |
+        cd build
+        make test || true  # Replace with your actual test command if different
 
     - name: Package the project
-      run: make distcheck || true  # Replace with your actual packaging command if different
+      run: |
+        cd build
+        make package || true  # Replace with your actual packaging command if different
