@@ -2,7 +2,7 @@
 #include "TA.h"
 using namespace std;
 
-static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
+static bool signatureGeneration(csprng *RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A);
 bool checkRegValid(octet *registrationId);
 
 TA::TA() {}
@@ -13,7 +13,7 @@ TA::TA(csprng *RNG)
     this->groupKey = Key(RNG);
 }
 
-void TA::validateRequest(csprng* RNG, octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
+void TA::validateRequest(csprng *RNG, octet *registrationId, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
     auto regValid = checkRegValid(registrationId);
     if (!regValid)
@@ -28,6 +28,11 @@ void TA::validateRequest(csprng* RNG, octet *registrationId, octet *vehiclePubli
     // generate signatureKey and A
     auto temp = this->getGroupKey().getPrivateKey();
     bool sigGen = signatureGeneration(RNG, &temp, vehiclePublicKey, SignatureKey, A);
+    if (!sigGen)
+    {
+        cout << "Signature generation failed" << endl;
+        return;
+    }
 }
 
 void TA::setGroupKey(Key groupKey)
@@ -57,12 +62,11 @@ bool checkRegValid(octet *registrationId)
     return true;
 }
 
-static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
+static bool signatureGeneration(csprng *RNG, octet *groupPrivateKey, octet *vehiclePublicKey, octet *SignatureKey, octet *A)
 {
     // Generate a random key
     Key randomKey(RNG);
 
-    
     // Ensure 'result' is properly initialized to handle the concatenation
     octet result;
     result.len = 0; // Start with an empty octet
@@ -71,7 +75,7 @@ static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehi
 
     // Concatenate vehicle public key and random private key
     auto publicKey = randomKey.getPublicKey();
-    OCT_copy(A,&publicKey);
+    OCT_copy(A, &publicKey);
     Message::Concatenate_octet(vehiclePublicKey, &publicKey, &result);
 
     // Hash the concatenated result into a temporary hash result
@@ -85,7 +89,7 @@ static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehi
     auto privateKey = randomKey.getPrivateKey();
     octet product;
     product.len = 0;
-    product.max = privateKey.len;  // Assuming result fits into the size of the private key
+    product.max = privateKey.len; // Assuming result fits into the size of the private key
     product.val = new char[product.max];
     Message::multiply_octet(&privateKey, &hashResult, &product);
 
@@ -99,4 +103,3 @@ static bool signatureGeneration(csprng* RNG, octet *groupPrivateKey, octet *vehi
 
     return true;
 }
-    

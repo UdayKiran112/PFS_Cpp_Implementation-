@@ -56,13 +56,6 @@ int Key::generatePrivateKey(csprng *randomNumberGenerator, octet *PrivateKey)
     using namespace Ed25519;
     using namespace B256_56;
 
-    BIG order;
-    // Manually copy the contents of CURVE_Order into the local order variable
-    for (int i = 0; i < NLEN_B256_56; i++)
-    {
-        order[i] = CURVE_Order[i];
-    }
-
     BIG secret;
 
     int err = 0;
@@ -93,13 +86,7 @@ int Key::generatePublicKey(octet *PrivateKey, octet *publicKey, Ed25519::ECP *ge
     using namespace Ed25519;
     using namespace B256_56;
     int res = 0;
-    BIG secret, order;
-
-    // Manually copy the contents of CURVE_Order into the local order variable
-    for (int i = 0; i < NLEN_B256_56; i++)
-    {
-        order[i] = CURVE_Order[i];
-    }
+    BIG secret;
 
     BIG_fromBytes(secret, PrivateKey->val);
     ECP_mul(generatorPoint, secret);
