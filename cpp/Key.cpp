@@ -37,11 +37,18 @@ void Key::PointGeneration(Ed25519::ECP *G)
     using namespace Ed25519;
 
     ECP P;
-    ECP_generator(&P);
+    ECP_output(&P);
+
+    bool gen = ECP_generator(&P);
+    ECP_output(&P);
+
+    if(gen == 0)
+    {
+        throw runtime_error("Point Generation Failed");
+    }
     if (ECP_isinf(&P) == 1)
     {
-        cout << "Point at infinity" << endl;
-        exit(0);
+        throw runtime_error("Generated point is at infinity");
     }
     else
     {

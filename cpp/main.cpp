@@ -42,6 +42,9 @@ int main()
     
     // verification by the receiver 
     Vehicle receiverVehicle = Vehicle(&RNG, ta);
-    receiverVehicle.Validate_Message(&generator, &vehicle.getSignatureKey(), &vehicle.getVehicleKey().getPublicKey(), &vehicle.getA(), msg);
+    octet vehicleSignKey = vehicle.getSignatureKey();
+    octet vehiclePubKey = vehicle.getVehicleKey().getPublicKey();
+    octet Ap = vehicle.getA();
+    receiverVehicle.Validate_Message(&generator, &vehicleSignKey, &vehiclePubKey, &Ap, msg);
 
 }
