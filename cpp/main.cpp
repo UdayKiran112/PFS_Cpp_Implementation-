@@ -6,17 +6,6 @@ using namespace std;
 
 // using namespace core;
 
-char *StrtoCharstar(string s)
-{
-    char *c = new char[s.length() + 1];
-    strcpy(c, s.c_str());
-    return c;
-}
-
-void sendAndValidate()
-{
-}
-
 int main()
 {
 
@@ -38,8 +27,12 @@ int main()
     Ed25519::ECP generator;
     Key::PointGeneration(&generator);
 
-    Vehicle vehicle = Vehicle(&RNG);
+    TA ta = TA(&RNG);
+    Vehicle vehicle = Vehicle(&RNG, ta);
 
+    // initilize an octet with a static integer in it
+    octet reg = {0, 4, (char *)"1234"};
+    vehicle.setRegistrationId(reg); // for testing purposes
     vehicle.requestVerification(&RNG);
 
     Message msg;
@@ -47,4 +40,8 @@ int main()
     string message = "Mugiwara";
     vehicle.signMessage(&RNG, message, &B, msg);
     
+    // verification by the receiver 
+    Vehicle receiverVehicle = Vehicle(&RNG, ta);
+    receiverVehicle.Validate_Message(&generator, &vehicle.getSignatureKey(), &vehicle.getVehicleKey().getPublicKey(), &vehicle.getA(), msg);
+
 }

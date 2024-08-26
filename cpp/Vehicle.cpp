@@ -17,9 +17,9 @@ Vehicle::Vehicle(octet registrationId, Key vehicleKey, octet signatureKey, octet
 
 Vehicle::Vehicle() {}
 
-Vehicle::Vehicle(csprng *RNG)
+Vehicle::Vehicle(csprng *RNG, TA ta)
 {
-    this->ta = TA(RNG);
+    this->vehicleKey = Key(RNG);
 }
 octet Vehicle::getRegistrationId()
 {
@@ -151,7 +151,7 @@ bool Vehicle::signMessage(csprng *RNG, string message, octet *B, Message msg)
 
 #define T_replay 1000
 
-bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signatureKey,core::octet *VehiclePublicKey, core::octet *A,Message msg)
+bool Vehicle::Validate_Message(Ed25519::ECP *GeneratorPoint, core::octet *signatureKey, core::octet *VehiclePublicKey, core::octet *A, Message msg)
 {
     using namespace B256_56;
 
