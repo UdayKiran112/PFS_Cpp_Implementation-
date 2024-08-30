@@ -32,6 +32,8 @@ int main()
 
     // initilize an octet with a static integer in it
     octet reg = {0, 4, (char *)"1234"};
+    // output the octet reg
+    OCT_output_string(&reg);
     vehicle.setRegistrationId(reg); // for testing purposes
     vehicle.requestVerification(&RNG);
 

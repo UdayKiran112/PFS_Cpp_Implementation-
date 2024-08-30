@@ -59,6 +59,13 @@ endif
 $(shell $(call MKDIR_CMD,$(OBJ_DIR)/Lib))
 $(shell $(call MKDIR_CMD,$(BIN_DIR)))
 
+# Enable debug mode
+ifeq ($(DEBUG),1)
+    CXXFLAGS += -g -O0
+else
+    CXXFLAGS += -O2
+endif
+
 # Default target
 all: $(TARGET)
 
