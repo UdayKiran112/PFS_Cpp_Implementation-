@@ -50,3 +50,4 @@ int main()
     receiverVehicle.Validate_Message(&generator, &vehicleSignKey, &vehiclePubKey, &Ap, msg);
 
 }
+// check
